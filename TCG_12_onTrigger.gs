@@ -1,5 +1,3 @@
-// F2FLeagueOnOpen
-
 // **********************************************
 // function OnOpen()
 //
@@ -8,14 +6,21 @@
 //
 // **********************************************
 
-function onOpen() {
+function onOpenMinisMaster() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-//  var shtFirst =  ss.getSheets()[0];
-//  
-//  ss.setActiveSheet(shtFirst);
   
-  var AnalyzeDataMenu  = [{name: 'Analyze New Match Entry', functionName: 'fcnMain'}, {name: 'Reset Match Entries', functionName:'fcnResetLeagueMatch'}];
-  var LeagueMenu = [{name:'Initialize League', functionName:'fcnInitLeague'}, {name:'Setup Response Sheets',functionName:'fcnSetupResponseSht'}, {name:'Update Config ID & Links', functionName:'fcnUpdateLinksIDs'}];
+  var AnalyzeDataMenu  = [];
+  AnalyzeDataMenu.push({name: 'Analyze New Match Entry', functionName: 'fcnMain'});
+  AnalyzeDataMenu.push({name: 'Reset Match Entries', functionName:'fcnResetLeagueMatch'});
+  
+  var LeagueMenu = [];
+  LeagueMenu.push({name:'Initialize League', functionName:'fcnInitLeague'});
+  LeagueMenu.push({name:'Setup Response Sheets',functionName:'fcnSetupResponseSht'});
+  LeagueMenu.push({name:'Update Config ID & Links', functionName:'fcnUpdateLinksIDs'});
+  LeagueMenu.push(null);
+  LeagueMenu.push({name:'Delete Players DB',functionName:'fcnDelPlayerCardDB'});
+  LeagueMenu.push({name:'Delete Players Pools', functionName:'fcnDelPlayerCardPoolSht'});
+
   
   ss.addMenu("Manage League", LeagueMenu);
   ss.addMenu("Process Data", AnalyzeDataMenu);
@@ -29,7 +34,7 @@ function onOpen() {
 //
 // **********************************************
 
-function onWeekChange(){
+function onWeekChangeMinisMaster(){
 
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
