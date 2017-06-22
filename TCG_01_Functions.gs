@@ -483,6 +483,10 @@ function fcnCopyStandingsResults(ss, shtConfig){
   var FormUrlEN = shtConfig.getRange(19,2).getValue();
   var FormUrlFR = shtConfig.getRange(22,2).getValue();
   
+  // League Name
+  var Location = shtConfig.getRange(11,2).getValue();
+  var LeagueName = shtConfig.getRange(3,2).getValue();
+  
   var ssMstrSht;
   var ssMstrShtStartRow;
   var ssMstrShtMaxRows;
@@ -509,7 +513,6 @@ function fcnCopyStandingsResults(ss, shtConfig){
     
     // Set the number of values to fetch
     NumValues = ssMstrShtMaxRows - ssMstrShtStartRow + 1;
-    Logger.log('Num Values %s',NumValues);
     
     // Get Range and Data from Master and copy to Standings
     ssMstrShtData = ssMstrSht.getRange(ssMstrShtStartRow,1,NumValues,ssMstrShtMaxCols).getValues();
@@ -517,6 +520,9 @@ function fcnCopyStandingsResults(ss, shtConfig){
     ssLgShtFr.getRange(ssMstrShtStartRow,1,NumValues,ssMstrShtMaxCols).setValues(ssMstrShtData);
     
     if (sht == 0){
+      // Update League Name
+      ssLgShtEn.getRange(4,2).setValue(LeagueName + ' League Standings')
+      ssLgShtFr.getRange(4,2).setValue('Classement Ligue ' + LeagueName)
       // Update Form Link
       ssLgShtEn.getRange(2,5).setValue('=HYPERLINK("' + FormUrlEN + '","Send Match Results")');      
       ssLgShtFr.getRange(2,5).setValue('=HYPERLINK("' + FormUrlFR + '","Envoyer Résultats de Match")'); 
@@ -531,7 +537,6 @@ function fcnCopyStandingsResults(ss, shtConfig){
       // Column K (11)
       ColValues = ssLgShtFr.getRange(ssMstrShtStartRow, 11, NumValues, 1).getValues();
       for (var row = 0 ; row < NumValues; row++){
-        Logger.log('Row %s Value %s',row, ColValues[row][0]);
         if (ColValues[row][0] == 'Active') ColValues[row][0] = 'Actif';
         if (ColValues[row][0] == 'Eliminated') ColValues[row][0] = 'Éliminé';
       }
@@ -546,9 +551,9 @@ function fcnCopyStandingsResults(ss, shtConfig){
       }
       ssLgShtFr.getRange(ssMstrShtStartRow, 13, NumValues, 1).setValues(ColValues);
     }
-        
   }
 }
+
 
 // **********************************************
 // function fcnAnalyzeLossPenalty()
