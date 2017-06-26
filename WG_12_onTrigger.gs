@@ -6,7 +6,7 @@
 //
 // **********************************************
 
-function onOpenMinisMaster() {
+function onOpenWG_Master() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
   var AnalyzeDataMenu  = [];
@@ -34,7 +34,7 @@ function onOpenMinisMaster() {
 //
 // **********************************************
 
-function onWeekChangeMinisMaster(){
+function onWeekChangeWG_Master(){
 
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();

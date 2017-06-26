@@ -98,7 +98,7 @@ function fcnSendConfirmEmailEN(shtConfig, Address, MatchData) {
           "<br><br>Click below to send another Match Report:"+
             "<br>"+ MatchReporterUrl +
               "<br><br>If you find any problems with your match result, please reply to this message and describe the situation as best you can. You will receive a response once it has been processed."+
-                "<br><br>Thank you for using TCG Booster League Manager from Triad Gaming Leagues & Tournaments";
+                "<br><br>Thank you for using Wargames League Manager from Triad Gaming Leagues & Tournaments";
   
   // End of Email Message
   EmailMessage += '</body></html>';
@@ -211,7 +211,7 @@ function fcnSendErrorEmailEN(shtConfig, Address, MatchData, MatchID, Status) {
             "<br><br>Click below to send another Match Report:"+
               "<br>"+ MatchReporterUrl +
                 "<br><br>If you find any problems with your match result, please reply to this message and describe the situation as best you can. You will receive a response once it has been processed."+
-                  "<br><br>Thank you for using TCG Booster League Manager from Triad Gaming Leagues & Tournaments";
+                  "<br><br>Thank you for using Wargames League Manager from Triad Gaming Leagues & Tournaments";
   }
   
   // End of Email Message
@@ -295,7 +295,7 @@ function fcnSendConfirmEmailFR(shtConfig, Address, MatchData) {
           "<br><br>Cliquez ci-dessous pour envoyer un autre rapport de match:"+
             "<br>"+ MatchReporterUrl +
               "<br><br>Si vous remarquez quel problème que ce soit dans ce rapport, SVP répondez à ce courriel en décrivant la situation de votre mieux. Vous recevrez une réponse dès que la situation sera traitée."+
-                "<br><br>Merci d'utiliser TCG Booster League Manager de Triad Gaming Leagues & Tournaments";
+                "<br><br>Merci d'utiliser Wargames League Manager de Triad Gaming Leagues & Tournaments";
   
   // End of Email Message
   EmailMessage += "</body></html>";
@@ -408,7 +408,7 @@ function fcnSendErrorEmailFR(shtConfig, Address, MatchData, MatchID, Status) {
             "<br><br>Cliquez ci-dessous pour envoyer un autre rapport de match:"+
               "<br>"+ MatchReporterUrl +
                 "<br><br>Si vous remarquez quel problème que ce soit dans ce rapport, SVP répondez à ce courriel en décrivant la situation de votre mieux. Vous recevrez une réponse dès que la situation sera traitée."+
-                  "<br><br>Merci d'utiliser TCG Booster League Manager de Triad Gaming Leagues & Tournaments";
+                  "<br><br>Merci d'utiliser Wargames League Manager de Triad Gaming Leagues & Tournaments";
   }
   
   // End of Email Message

@@ -160,28 +160,28 @@ function fcnUpdateLinksIDs(){
       FileName = CopyLogVal[row][0];
       
       switch(FileName){
-        case 'Master TCG Booster League' :
+        case 'Master WG League' :
           ConfigRowID = StartRowConfigId + 0;
           ConfigRowLk = 'Not Found'; break;
-        case 'Master TCG Booster League Card DB' :
+        case 'Master WG League Army Lists DB' :
           ConfigRowID = StartRowConfigId + 1; 
           ConfigRowLk = 'Not Found'; break;
-        case 'Master TCG Booster League Card Pool EN' :
+        case 'Master WG League Army Lists EN' :
           ConfigRowID = StartRowConfigId + 2; 
           ConfigRowLk = StartRowConfigLink + 1; break;
-        case 'Master TCG Booster League Card Pool FR' :
+        case 'Master WG League Army Lists FR' :
           ConfigRowID = StartRowConfigId + 3; 
           ConfigRowLk = StartRowConfigLink + 4; break;
-        case 'Master TCG Booster League Standings EN' :
+        case 'Master WG League Standings EN' :
           ConfigRowID = StartRowConfigId + 4; 
           ConfigRowLk = StartRowConfigLink + 0; break;
-        case 'Master TCG Booster League Standings FR' :
+        case 'Master WG League Standings FR' :
           ConfigRowID = StartRowConfigId + 5; 
           ConfigRowLk = StartRowConfigLink + 3; break;
-        case 'Master TCG Booster League Match Reporter EN' :
+        case 'Master WG League Match Reporter EN' :
           ConfigRowID = 'Not Found';
           ConfigRowLk = 'Not Found'; break;
-        case 'Master TCG Booster League Match Reporter FR' :
+        case 'Master WG League Match Reporter FR' :
           ConfigRowID = 'Not Found';
           ConfigRowLk = 'Not Found'; break;	
         default : 
