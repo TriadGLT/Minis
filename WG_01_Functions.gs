@@ -192,6 +192,7 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
   var OptPostResult = ConfigData[1][0];
   var OptPlyrMatchValidation = ConfigData[2][0];
   var OptTCGBooster = ConfigData[3][0];
+  var OptWargame = ConfigData[4][0];
   
   // Match Results Sheet Variables
   var shtRslt = ss.getSheetByName('Match Results');
@@ -220,7 +221,7 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
   }
   
   // Copies Players Data
-  ResultData[0][2] = ResponseData[0][2]; // Location
+  ResultData[0][2] = ResponseData[0][2];  // Location
   ResultData[0][3] = ResponseData[0][3];  // Week/Round Number
   ResultData[0][4] = ResponseData[0][4];  // Winning Player
   ResultData[0][5] = ResponseData[0][5];  // Losing Player
@@ -243,16 +244,26 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
   
   // If both players have played a valid match
   if (MatchValidWinr[0] == 1 && MatchValidLosr[0] == 1){
-    // Copies Result Data
-    // ResultData[0][0] = Result ID 
-    ResultData[0][1] = MatchID; // Match ID
-    ResultData[0][6] = ResponseData[0][6]; // Score
-    ResultData[0][7] = 2; // Winner Score
-    if (ResponseData[0][6] == '2 - 0') ResultData[0][8] = 0; // Loser Score
-    if (ResponseData[0][6] == '2 - 1') ResultData[0][8] = 1; // Loser Score
     
-    // Copies Card Data
-    if (OptTCGBooster == 'Enabled'){
+    // Copies Match ID
+    ResultData[0][1] = MatchID; // Match ID
+
+    // If Wargame Option is Selected
+    if(OptWargame == 'Enabled' && OptTCGBooster == 'Disabled'){
+      ResultData[0][6] = ResponseData[0][6]; // Winner Points
+      ResultData[0][7] = ResponseData[0][7]; // Loser Points
+    }
+    
+    // If TCG Booster Option is Selected
+    if (OptTCGBooster == 'Enabled' && OptWargame == 'Disabled'){
+      
+      // Copies Result Data from Response Data
+      ResultData[0][6] = ResponseData[0][6]; // Score
+      ResultData[0][7] = 2; // Winner Score
+      if (ResponseData[0][6] == '2 - 0') ResultData[0][8] = 0; // Loser Score
+      if (ResponseData[0][6] == '2 - 1') ResultData[0][8] = 1; // Loser Score
+
+      // Copies Card Data      
       ResultData[0][9] = ResponseData[0][7]; // Expansion Set
       ResultData[0][10] = ResponseData[0][8]; // Card 1
       ResultData[0][11] = ResponseData[0][9]; // Card 2
@@ -318,7 +329,8 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
   MatchData[4][1] = MatchValidWinr[1];   // Winning Player Matches Played
   MatchData[5][0] = ResponseData[0][5];  // Losing Player
   MatchData[5][1] = MatchValidLosr[1];   // Losing Player Matches Played
-  MatchData[6][0] = ResponseData[0][6];  // Score
+  MatchData[6][0] = ResponseData[0][6];  // Winner Score
+  MatchData[7][0] = ResponseData[0][7];  // Loser Score
   MatchData[25][0] = MatchPostedStatus;
   
   return MatchData;
@@ -338,6 +350,7 @@ function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
 
   // Code Execution Options
   var OptTCGBooster = ConfigData[3][0];
+  var OptWargame = ConfigData[4][0];
   var ColPackWeekRslt = ConfigData[23][0];
   
   // function variables
@@ -357,6 +370,8 @@ function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
   var ColLos = 6;
   var PackLength = 16;
   var NextPackID = 0;
+  var CfgPowerLevel;
+  var PowerLevel;
   
   var WeekWinrRow = 0;
   var WeekLosrRow = 0;
@@ -387,7 +402,7 @@ function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
       shtWeekWinrLoc = shtWeekRslt.getRange(WeekWinrRow,9).getValue();
       shtWeekLosrRec = shtWeekRslt.getRange(WeekLosrRow,5,1,2).getValues();
       shtWeekLosrLoc = shtWeekRslt.getRange(WeekLosrRow,9).getValue();
-      
+            
       // If Game Type is TCG
       if (OptTCGBooster == 'Enabled'){
       // Get Loser Pack Data
@@ -415,6 +430,16 @@ function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
   shtWeekRslt.getRange(WeekWinrRow,9).setValue(shtWeekWinrLoc);
   shtWeekRslt.getRange(WeekLosrRow,5,1,2).setValues(shtWeekLosrRec);
   shtWeekRslt.getRange(WeekLosrRow,9).setValue(shtWeekLosrLoc);
+  
+
+  // If Game Type is Wargame
+  if (OptWargame == 'Enabled'){
+    // Get Loser Amount of Power Level Bonus and Increase by value from Config file
+    CfgPowerLevel = ss.getSheetByName('Config').getRange(8,7).getValue();
+    PowerLevel = shtWeekRslt.getRange(WeekLosrRow,ColPackWeekRslt).getValue();
+    shtWeekRslt.getRange(WeekLosrRow,ColPackWeekRslt).setValue(CfgPowerLevel + PowerLevel);
+  }
+  
   
   // If Game Type is TCG and Punishment Pack has been opened, update Punishment Pack Info
   if (OptTCGBooster == 'Enabled' && ResultData[0][9] != ''){

@@ -6,198 +6,202 @@
  */
 function setUpForm() {
   
-  var ss = SpreadsheetApp.getActive();
-  var TestSht = ss.getSheetByName("Test");
+  var NbUnitMax = 10;
+  var ChUnit;
+  var ChDetach;
+  var ChEnd;
+  var DetachType;
+  var UnitPage = new Array(325);
+  var Title;
+  var Index;
+  var UnitRole;
+  var TestCol = 1;
   
-  // FormData Sheet variables
-  var FormDataSht = ss.getSheetByName("FormData8");
-  var FormDataMaxCol = FormDataSht.getMaxColumns();
-  var FormDataRng = FormDataSht.getRange("A1:L1");
-  var FormDataCat = FormDataRng.getValues();
-  
-  // Config Sheet variables
-  var ConfigSht = ss.getSheetByName("Config");
-  var ConfigTeamRng = ConfigSht.getRange(16, 3, 6, 8);
-  var ConfigTeamVal = ConfigTeamRng.getValues();
-  var TableName;
-  var TeamID;
-  var TeamNameA;
-  var TeamNameB;
-  var TeamNb;
-  var ctTeamA = "A";
-  var ctTeamB = "B";
+  // Sets the P
 
-  // Loops to get Categories in FormDataCat[0][0-11]
-  //  0 = Round
-  //  1 = Numéro de Table
-  //  2 = Équipe A
-  //  3 = Joueur A
-  //  4 = Équipe B
-  //  5 = Joueur B
-  //  6 = Joueur A - Points Détruits
-  //  7 = Joueur A - Points Perdus
-  //  8 = Joueur B - Points Détruits
-  //  9 = Joueur B - Points Perdus
-  // 10 = Joueur A - Sportsmanship
-  // 11 = Joueur B - Sportsmanship
+  Logger.clear();
   
-  for (var j = 0; j<= 11; j++) {
-    TestSht.getRange(j+1, 1).setValue(FormDataCat[0][j]);
-  }
+  var FormName = "Wargaming League Subscription";
+  var form = FormApp.create(FormName).setTitle("Wargaming League Subscription");
+  //var form = FormApp.openById("1VF-2McIUPJPk2zqM7ruSRmNsjOmvDnaMbCTJKjVjcVQ");
+
+//  var formItems = form.getItems();
+//  //Logger.log(formItems.length)
+//  for(var items = 0; items < formItems.length; items++){
+//    form.deleteItem(formItems[items]);
+//  }
   
+  form.setDescription("Please fill up the following to submit your Army List");
+  form.setCollectEmail(true);
+  // Sets Results Destination - NOT USED
+  //form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
   
-  // Team Names and Players in ConfigTeamVal[0-5][0-7] [i][j]
-  // Team #       = j+1
-  // Team # Value = ConfigTeamVal[0][j+1]
-  // Team Names   = ConfigTeamVal[1][j+1]
-  // Players 1..4 = ConfigTeamVal[2-5][j+1]  
+  // Player name
+  form.addTextItem()
+      .setTitle("Full Name")
+      .setRequired(true);
+
+  // Faction name
+  form.addTextItem()
+      .setTitle("Faction")
+      .setRequired(true);  
   
-  for (var j = 0; j <= 7; j++) {
-    for (var i = 0; i <= 5; i++){
-      TestSht.getRange(i+2, j+2).setValue(ConfigTeamVal[i][j]);
-    }
-  }
+  // Warlord name
+  form.addTextItem()
+      .setTitle("Warlord Name")
+      .setRequired(true); 
+
+  // Army name
+  form.addTextItem()
+      .setTitle("Army Name")
+      .setRequired(false); 
+
   
-  // All Forms will need Categories 0-9
-  // Team A + Cat 11
-  // Team B + Cat 10
+  // Creates the Detachment 1 Section
+  var Detach1 = form.addPageBreakItem().setTitle("Detachment 1");
+  // Detachment Name
+  form.addTextItem()
+      .setTitle("Detachment 1 Name")
+      .setRequired(true);
+  // Detachment Type
+  DetachType = form.addListItem();
+  DetachType.setTitle("Detachment 1 Type")
+  DetachType.setRequired(true)
+  DetachType.setChoices([DetachType.createChoice("Patrol"),
+                         DetachType.createChoice("Battalion"),
+                         DetachType.createChoice("Brigade"),
+                         DetachType.createChoice("Vanguard"),
+                         DetachType.createChoice("Spearhead"),
+                         DetachType.createChoice("Outrider"),
+                         DetachType.createChoice("Supreme Command"),
+                         DetachType.createChoice("Super-Heavy"),
+                         DetachType.createChoice("Air Wing"),
+                         DetachType.createChoice("Super-Heavy Auxiliary"),
+                         DetachType.createChoice("Fortification Network"),
+                         DetachType.createChoice("Auxiliary Support")]);
   
-  // Players Names (Cat 3,5) will be populated according to Team # (Cat 2,4)
+  // Creates the Detachment 2 Section
+  var Detach2 = form.addPageBreakItem().setTitle("Detachment 2");
+  // Detachment Name
+  form.addTextItem()
+      .setTitle("Detachment 2 Name")
+      .setRequired(true);
+  // Detachment Type
+  DetachType = form.addListItem();
+  DetachType.setTitle("Detachment 2 Type")
+  DetachType.setRequired(true)
+  DetachType.setChoices([DetachType.createChoice("Patrol"),
+                         DetachType.createChoice("Battalion"),
+                         DetachType.createChoice("Brigade"),
+                         DetachType.createChoice("Vanguard"),
+                         DetachType.createChoice("Spearhead"),
+                         DetachType.createChoice("Outrider"),
+                         DetachType.createChoice("Supreme Command"),
+                         DetachType.createChoice("Super-Heavy"),
+                         DetachType.createChoice("Air Wing"),
+                         DetachType.createChoice("Super-Heavy Auxiliary"),
+                         DetachType.createChoice("Fortification Network"),
+                         DetachType.createChoice("Auxiliary Support")]);  
   
-  //  // Create the form according to the Round and Table
- var TestCol = 1;
+  // Creates the Detachment 3 Section
+  var Detach3 = form.addPageBreakItem().setTitle("Detachment 3");
+    // Detachment Name
+  form.addTextItem()
+      .setTitle("Detachment 3 Name")
+      .setRequired(true);
+  // Detachment Type
+  DetachType = form.addListItem();
+  DetachType.setTitle("Detachment 3 Type")
+  DetachType.setRequired(true)
+  DetachType.setChoices([DetachType.createChoice("Patrol"),
+                         DetachType.createChoice("Battalion"),
+                         DetachType.createChoice("Brigade"),
+                         DetachType.createChoice("Vanguard"),
+                         DetachType.createChoice("Spearhead"),
+                         DetachType.createChoice("Outrider"),
+                         DetachType.createChoice("Supreme Command"),
+                         DetachType.createChoice("Super-Heavy"),
+                         DetachType.createChoice("Air Wing"),
+                         DetachType.createChoice("Super-Heavy Auxiliary"),
+                         DetachType.createChoice("Fortification Network"),
+                         DetachType.createChoice("Auxiliary Support")]);
   
-  for(var Round = 1; Round <= 4; Round ++) {
-    for (var Table = 1; Table <= 4; Table ++){
-      for (var Team = 1; Team<=2; Team ++){
+  for(var DetachNb = 1; DetachNb <= 3; DetachNb++){
+    for(var UnitNb = 1; UnitNb <= NbUnitMax; UnitNb++){
+      
+      // Creates the Unit Section
+      Index = (DetachNb*100) + UnitNb;
+      Title = "Detachment " + DetachNb + " - Unit " + UnitNb;
+      UnitPage[Index] = form.addPageBreakItem().setTitle(Title);
+      Logger.log(Index);
+      // Unit Title
+      form.addTextItem()
+          .setTitle("Detachment " + DetachNb + " - Unit " + UnitNb + " - Unit Title")
+          .setRequired(true);
      
-        // Team Name Selection for iteration
-        if(Team == 1) TeamID = "A";
-        if(Team == 2) TeamID = "B";
-        
-        // Table Number Selection for iteration
-        if(Table == 1) TableName = "A";
-        if(Table == 2) TableName = "B";
-        if(Table == 3) TableName = "C";
-        if(Table == 4) TableName = "D";
-        
-        var FormName = "Résultats Crève Mon Sale X-Wing 2017 - R" + Round + TableName + " - Équipe " + TeamID;
-        var form = FormApp.create(FormName).setTitle("Crève Mon Sale X-Wing 2017");
-        form.setDescription("Résultats Round " + Round + " - Table " + TableName + " - Équipe " + TeamID)
-        // Sets Results Destination - NOT USED
-        //form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
-        
-        // Sets Round Number
-        var FormRound = form.addMultipleChoiceItem().setTitle("Round")
-        FormRound.setRequired(true);
-        FormRound.setChoices([FormRound.createChoice("Round "+Round)])
+      // Unit Role
+      UnitRole = form.addListItem();
+      UnitRole.setTitle("Detachment " + DetachNb + " - Unit " + UnitNb + " - Unit Role")
+      UnitRole.setRequired(true)
+      UnitRole.setChoices([UnitRole.createChoice("HQ"),
+                           UnitRole.createChoice("Elite"),
+                           UnitRole.createChoice("Troops"),
+                           UnitRole.createChoice("Fast Attack"),
+                           UnitRole.createChoice("Heavy"),
+                           UnitRole.createChoice("Transport"),
+                           UnitRole.createChoice("Flyer"),
+                           UnitRole.createChoice("Lord of War"),
+                           UnitRole.createChoice("Fortifications")]);
+  
+      // Number of Models in Unit
+      var ModelValidation = FormApp.createTextValidation()
+                                  .setHelpText("Enter a number between 1 and 100.")
+                                  .requireNumberBetween(1, 100)
+                                  .build();
+      form.addTextItem()
+          .setTitle("Detachment " + DetachNb + " - Unit " + UnitNb + " - Number of Models in Unit")
+          .setRequired(true)
+          .setValidation(ModelValidation);
 
-        
-        // Sets Table Number
-        var FormTable = form.addMultipleChoiceItem().setTitle("Numéro de Table")
-        FormTable.setRequired(true);
-        FormTable.setChoices([FormTable.createChoice(TableName+"1"),
-                              FormTable.createChoice(TableName+"2"),
-                              FormTable.createChoice(TableName+"3"),
-                              FormTable.createChoice(TableName+"4")]);
-        
-        
-        // Creates Team A Section
-        form.addPageBreakItem().setTitle("Équipes et Joueurs");
-        var FormTeamA = form.addMultipleChoiceItem().setTitle("Nom de l'Équipe A");
-        FormTeamA.setRequired(true);        
-        
-        // Gets the Team Number from the FormData8 Spreadsheet
-        // Finds Team Number according to Round, Table and Team ID
-        var TeamNbA = fcnFindTeamNb(FormDataSht,Round,TableName,ctTeamA);
-        TeamNameA = ConfigTeamVal[1][TeamNbA-1];
-        FormTeamA.setChoices([FormTeamA.createChoice(TeamNameA)]);
-                
-        // Creates Players Team A Section
-        var FormPlayersA = form.addMultipleChoiceItem().setTitle("Joueurs de l'équipe " + TeamNameA);
-        FormPlayersA.setRequired(true);
-        FormPlayersA.setHelpText("Sélectionnez le joueur de l'équipe " + TeamNameA);
-        // Gets Team A Players Names
-        FormPlayersA.setChoices([FormPlayersA.createChoice(ConfigTeamVal[2][TeamNbA-1]),
-                                 FormPlayersA.createChoice(ConfigTeamVal[3][TeamNbA-1]),
-                                 FormPlayersA.createChoice(ConfigTeamVal[4][TeamNbA-1]),
-                                 FormPlayersA.createChoice(ConfigTeamVal[5][TeamNbA-1])]);
-
-        
-        //        TestCol ++;
-        //        TestSht.getRange(21,TestCol).setValue(Round);
-        //        TestSht.getRange(22,TestCol).setValue(TableName);
-        //        TestSht.getRange(23,TestCol).setValue(TeamID);
-        //        TestSht.getRange(24,TestCol).setValue(TeamNbA);
-        //        TestSht.getRange(25,TestCol).setValue(TeamNameA);
-                
-        
-        
-        // Creates Team B Section
-        //form.addPageBreakItem().setTitle("Équipe B");
-        //form.addSectionHeaderItem().setTitle("Équipe B")
-        var FormTeamB = form.addMultipleChoiceItem().setTitle("Nom de l'Équipe B");
-        FormTeamB.setRequired(true);        
-        
-        // Gets the Team Number from the FormData8 Spreadsheet
-        // Finds Team Number according to Round, Table and Team ID
-        var TeamNbB = fcnFindTeamNb(FormDataSht,Round,TableName,ctTeamB);
-        TeamNameB = ConfigTeamVal[1][TeamNbB-1];
-        FormTeamB.setChoices([FormTeamB.createChoice(TeamNameB)]);
-
-        // Creates Players Team B Section
-        var FormPlayersB = form.addMultipleChoiceItem().setTitle("Joueurs de l'équipe " + TeamNameB);
-        FormPlayersB.setRequired(true);
-        FormPlayersB.setHelpText("Sélectionnez le joueur de l'équipe " + TeamNameB);
-        // Gets Team B Players Names
-        FormPlayersB.setChoices([FormPlayersB.createChoice(ConfigTeamVal[2][TeamNbB-1]),
-                                 FormPlayersB.createChoice(ConfigTeamVal[3][TeamNbB-1]),
-                                 FormPlayersB.createChoice(ConfigTeamVal[4][TeamNbB-1]),
-                                 FormPlayersB.createChoice(ConfigTeamVal[5][TeamNbB-1])]);
-
-        
-        // Creates Player A - Points Détruits / Perdus Section
-        form.addPageBreakItem().setTitle("Joueur A - Points Détruits / Perdus");
-        //form.addSectionHeaderItem().setTitle("Joueur A - Points Détruits / Perdus")
-        var FormPtsDestA = form.addTextItem().setTitle("Joueur A - Points Détruits");
-        FormPtsDestA.setRequired(true);
-        var FormPtsLostA =form.addTextItem().setTitle("Joueur A - Points Perdus");
-        FormPtsLostA.setRequired(true);
-        
-        // Creates Player B - Points Détruits / Perdus Section
-        form.addPageBreakItem().setTitle("Joueur B - Points Détruits / Perdus");
-        
-        //form.addSectionHeaderItem().setTitle("Joueur B - Points Détruits / Perdus")
-        var FormPtsDestB = form.addTextItem().setTitle("Joueur B - Points Détruits");
-        FormPtsDestB.setRequired(true);
-        var FormPtsLostB =form.addTextItem().setTitle("Joueur B - Points Perdus");
-        FormPtsLostB.setRequired(true);
-
-        
-        // Creates Player A Sportsmanship Section for Player B
-        if(TeamID == "B"){
-          form.addPageBreakItem().setTitle("Sportsmanship Joueur A");
-          var FormSpshipPlayerA = form.addMultipleChoiceItem().setTitle("Sportsmanship Joueur A"); 
-          FormSpshipPlayerA.setHelpText("Donnez l'appréciation du sportsmanship de votre adversaire.");
-          FormSpshipPlayerA.setRequired(true);
-          FormSpshipPlayerA.setChoices([FormSpshipPlayerA.createChoice("Faible"),
-                                        FormSpshipPlayerA.createChoice("Bon"),
-                                        FormSpshipPlayerA.createChoice("Très Bon"),
-                                        FormSpshipPlayerA.createChoice("Exceptionnel")]);
-        }
-        
-        // Creates Player B Sportsmanship Section for Player A
-        if(TeamID == "A"){
-          form.addPageBreakItem().setTitle("Sportsmanship Joueur B");
-          var FormSpshipPlayerB = form.addMultipleChoiceItem().setTitle("Sportsmanship Joueur B");  
-          FormSpshipPlayerB.setHelpText("Donnez l'appréciation du sportsmanship de votre adversaire.");
-          FormSpshipPlayerB.setRequired(true);
-          FormSpshipPlayerB.setChoices([FormSpshipPlayerB.createChoice("Faible"),
-                                        FormSpshipPlayerB.createChoice("Bon"),
-                                        FormSpshipPlayerB.createChoice("Très Bon"),
-                                        FormSpshipPlayerB.createChoice("Exceptionnel")]);
-        }
+      // Power Level of Unit
+      var LevelValidation = FormApp.createTextValidation()
+                                   .setHelpText("Enter a number between 1 and 100.")
+                                   .requireNumberBetween(1, 100)
+                                   .build();
+      form.addTextItem()
+          .setTitle("Detachment " + DetachNb + " - Unit " + UnitNb + " - Unit Power Level")
+          .setRequired(true)
+          .setValidation(LevelValidation);
+      
+      // Add Unit or Detachment 
+      var AddUnit = form.addMultipleChoiceItem();
+      AddUnit.setTitle("Add Another Unit or Another Detachment");
+      AddUnit.setRequired(true);
+      
+      // Create the different choices
+      ChUnit = AddUnit.createChoice("Add Another Unit",FormApp.PageNavigationType.CONTINUE);
+      ChEnd = AddUnit.createChoice("My Army List is Complete",FormApp.PageNavigationType.SUBMIT);
+      
+      // If Unit is First Detachment
+      if(DetachNb == 1) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach2);
+      if(DetachNb == 2) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach3);
+      
+      // Sets the Choices depending on the Unit and Detachment
+      if(DetachNb < 3){
+        if(UnitNb < NbUnitMax) AddUnit.setChoices([ChUnit, ChDetach, ChEnd]);
+        if(UnitNb == NbUnitMax) AddUnit.setChoices([ChDetach, ChEnd]);
+      }
+      
+      if(DetachNb == 3){
+        if(UnitNb < NbUnitMax) AddUnit.setChoices([ChUnit, ChEnd]);
+        if(UnitNb == NbUnitMax) AddUnit.setChoices([ChEnd]);
       }
     }
   }
+  // Sets Go To Unit Page
+  Detach2.setGoToPage(UnitPage[101]);
+  Detach3.setGoToPage(UnitPage[201]);
+  UnitPage[101].setGoToPage(UnitPage[301]);
+  
+  
 }

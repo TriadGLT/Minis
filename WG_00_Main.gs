@@ -154,6 +154,7 @@ function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
   var OptPostResult = ConfigData[1][0];
   var OptPlyrMatchValidation = ConfigData[2][0];
   var OptTCGBooster = ConfigData[3][0];
+  var OptWargame = ConfigData[4][0];
   var OptSendEmail = ConfigData[6][0];
   
   // Columns Values and Parameters
@@ -231,6 +232,7 @@ function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
   Logger.log('Post Results Option: %s',OptPostResult);
   Logger.log('Player Match Validation Option: %s',OptPlyrMatchValidation);
   Logger.log('TCG Option: %s',OptTCGBooster);
+  Logger.log('Wargame Option: %s',OptWargame);
   Logger.log('Send Email Option: %s',OptSendEmail);
   
   // Find a Row that is not processed in the Response Sheet (added data)
@@ -261,9 +263,6 @@ function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
         shtRspn.getRange(RspnRow, ColStatusMsg).setValue(Status[1]);
         
         Logger.log('New Data Found at Row: %s',RspnRow);
-        
-//        // Copy the new response data to Data Array
-//        ResponseData = shtRspn.getRange(RspnRow, 1, 1, RspnDataInputs).getValues();
         
         // Look for Duplicate Entry (looks in all entries with MatchID and combination of Week Number, Winner and Loser) 
         // Real code will look at Player Posting Data as well
@@ -307,7 +306,13 @@ function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
                 // Match ID doesn't change because we assumed it was already OK
                 Logger.log('Match Posted ID: %s',MatchID);
                 
-                // Copies all cards added to the Card Database
+                // If Game Type is Wargame, Update available amount of Power Level Available
+                if(OptWargame == 'Enabled'){
+                  // fcnUpdatePowerLevel(shtConfig, RspnDataLosr, shtTest);
+                }
+                
+                
+                // If Game Type is TCG, Copy all cards added to the Card Database
                 if (OptTCGBooster == 'Enabled'){
                   for (var card = 0; card < NbCards; card++){
                     CardList[card] = ResponseData[0][card+7];
