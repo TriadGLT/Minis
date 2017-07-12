@@ -15,6 +15,7 @@ function onOpenWG_Master() {
   
   var LeagueMenu = [];
   LeagueMenu.push({name:'Initialize League', functionName:'fcnInitLeague'});
+  LeagueMenu.push({name:'Create Army List Form', functionName:'fcnSetUpForm'});
   LeagueMenu.push({name:'Setup Response Sheets',functionName:'fcnSetupResponseSht'});
   LeagueMenu.push({name:'Update Config ID & Links', functionName:'fcnUpdateLinksIDs'});
   LeagueMenu.push(null);

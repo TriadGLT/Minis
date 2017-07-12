@@ -4,9 +4,16 @@
  * @param {Spreadsheet} ss The spreadsheet that contains the conference data.
  * @param {String[][]} values Cell values for the spreadsheet range.
  */
-function setUpForm() {
+function fcnSetUpForm() {
   
-  var NbUnitMax = 10;
+  var ss = SpreadsheetApp.getActive();
+  var shtConfig = ss.getSheetByName('Config');
+  
+  var NbDetachMax = shtConfig.getRange(12, 7).getValue();
+  var NbUnitDetach1 = shtConfig.getRange(13, 7).getValue();
+  var NbUnitDetach2 = shtConfig.getRange(14, 7).getValue();
+  var NbUnitDetach3 = shtConfig.getRange(15, 7).getValue();
+  var NbUnitMax;
   var ChUnit;
   var ChDetach;
   var ChEnd;
@@ -56,6 +63,8 @@ function setUpForm() {
       .setTitle("Army Name")
       .setRequired(false); 
 
+  Logger.log('Detachment:%s',NbDetachMax)
+  Logger.log('Units:%s',NbUnitMax)
   
   // Creates the Detachment 1 Section
   var Detach1 = form.addPageBreakItem().setTitle("Detachment 1");
@@ -81,52 +90,63 @@ function setUpForm() {
                          DetachType.createChoice("Auxiliary Support")]);
   
   // Creates the Detachment 2 Section
-  var Detach2 = form.addPageBreakItem().setTitle("Detachment 2");
-  // Detachment Name
-  form.addTextItem()
-      .setTitle("Detachment 2 Name")
-      .setRequired(true);
-  // Detachment Type
-  DetachType = form.addListItem();
-  DetachType.setTitle("Detachment 2 Type")
-  DetachType.setRequired(true)
-  DetachType.setChoices([DetachType.createChoice("Patrol"),
-                         DetachType.createChoice("Battalion"),
-                         DetachType.createChoice("Brigade"),
-                         DetachType.createChoice("Vanguard"),
-                         DetachType.createChoice("Spearhead"),
-                         DetachType.createChoice("Outrider"),
-                         DetachType.createChoice("Supreme Command"),
-                         DetachType.createChoice("Super-Heavy"),
-                         DetachType.createChoice("Air Wing"),
-                         DetachType.createChoice("Super-Heavy Auxiliary"),
-                         DetachType.createChoice("Fortification Network"),
-                         DetachType.createChoice("Auxiliary Support")]);  
+  if(NbDetachMax >= 2){
+    var Detach2 = form.addPageBreakItem().setTitle("Detachment 2");
+    // Detachment Name
+    form.addTextItem()
+    .setTitle("Detachment 2 Name")
+    .setRequired(true);
+    // Detachment Type
+    DetachType = form.addListItem();
+    DetachType.setTitle("Detachment 2 Type")
+    DetachType.setRequired(true)
+    DetachType.setChoices([DetachType.createChoice("Patrol"),
+                           DetachType.createChoice("Battalion"),
+                           DetachType.createChoice("Brigade"),
+                           DetachType.createChoice("Vanguard"),
+                           DetachType.createChoice("Spearhead"),
+                           DetachType.createChoice("Outrider"),
+                           DetachType.createChoice("Supreme Command"),
+                           DetachType.createChoice("Super-Heavy"),
+                           DetachType.createChoice("Air Wing"),
+                           DetachType.createChoice("Super-Heavy Auxiliary"),
+                           DetachType.createChoice("Fortification Network"),
+                           DetachType.createChoice("Auxiliary Support")]);  
+  }
   
   // Creates the Detachment 3 Section
-  var Detach3 = form.addPageBreakItem().setTitle("Detachment 3");
+  if(NbDetachMax >= 3){
+    var Detach3 = form.addPageBreakItem().setTitle("Detachment 3");
     // Detachment Name
-  form.addTextItem()
-      .setTitle("Detachment 3 Name")
-      .setRequired(true);
-  // Detachment Type
-  DetachType = form.addListItem();
-  DetachType.setTitle("Detachment 3 Type")
-  DetachType.setRequired(true)
-  DetachType.setChoices([DetachType.createChoice("Patrol"),
-                         DetachType.createChoice("Battalion"),
-                         DetachType.createChoice("Brigade"),
-                         DetachType.createChoice("Vanguard"),
-                         DetachType.createChoice("Spearhead"),
-                         DetachType.createChoice("Outrider"),
-                         DetachType.createChoice("Supreme Command"),
-                         DetachType.createChoice("Super-Heavy"),
-                         DetachType.createChoice("Air Wing"),
-                         DetachType.createChoice("Super-Heavy Auxiliary"),
-                         DetachType.createChoice("Fortification Network"),
-                         DetachType.createChoice("Auxiliary Support")]);
+    form.addTextItem()
+    .setTitle("Detachment 3 Name")
+    .setRequired(true);
+    // Detachment Type
+    DetachType = form.addListItem();
+    DetachType.setTitle("Detachment 3 Type")
+    DetachType.setRequired(true)
+    DetachType.setChoices([DetachType.createChoice("Patrol"),
+                           DetachType.createChoice("Battalion"),
+                           DetachType.createChoice("Brigade"),
+                           DetachType.createChoice("Vanguard"),
+                           DetachType.createChoice("Spearhead"),
+                           DetachType.createChoice("Outrider"),
+                           DetachType.createChoice("Supreme Command"),
+                           DetachType.createChoice("Super-Heavy"),
+                           DetachType.createChoice("Air Wing"),
+                           DetachType.createChoice("Super-Heavy Auxiliary"),
+                           DetachType.createChoice("Fortification Network"),
+                           DetachType.createChoice("Auxiliary Support")]);
+  }
   
-  for(var DetachNb = 1; DetachNb <= 3; DetachNb++){
+  // Loop through each potential unit of each detachment
+  
+  for(var DetachNb = 1; DetachNb <= NbDetachMax; DetachNb++){
+    // Selects the number of Units allowed in each Detachment
+    if(DetachNb == 1) NbUnitMax = NbUnitDetach1;
+    if(DetachNb == 2) NbUnitMax = NbUnitDetach2;
+    if(DetachNb == 3) NbUnitMax = NbUnitDetach3;
+    
     for(var UnitNb = 1; UnitNb <= NbUnitMax; UnitNb++){
       
       // Creates the Unit Section
@@ -184,24 +204,34 @@ function setUpForm() {
       
       // If Unit is First Detachment
       if(DetachNb == 1) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach2);
-      if(DetachNb == 2) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach3);
+      
+      // If Unit is Second Detachment and there are 3 Detachments
+      if(DetachNb == 2 && NbDetachMax == 3) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach3);
       
       // Sets the Choices depending on the Unit and Detachment
-      if(DetachNb < 3){
+      if(DetachNb < NbDetachMax){
         if(UnitNb < NbUnitMax) AddUnit.setChoices([ChUnit, ChDetach, ChEnd]);
         if(UnitNb == NbUnitMax) AddUnit.setChoices([ChDetach, ChEnd]);
       }
       
-      if(DetachNb == 3){
+      if(DetachNb == NbDetachMax){
         if(UnitNb < NbUnitMax) AddUnit.setChoices([ChUnit, ChEnd]);
         if(UnitNb == NbUnitMax) AddUnit.setChoices([ChEnd]);
       }
+    
+      if (DetachNb == NbDetachMax && UnitNb == NbUnitMax) UnitNb = NbUnitMax + 1; 
+    
     }
   }
   // Sets Go To Unit Page
-  Detach2.setGoToPage(UnitPage[101]);
-  Detach3.setGoToPage(UnitPage[201]);
-  UnitPage[101].setGoToPage(UnitPage[301]);
-  
-  
+  if(NbDetachMax == 2){
+    Detach2.setGoToPage(UnitPage[101]);
+    UnitPage[101].setGoToPage(UnitPage[201]);
+  }
+   
+  if(NbDetachMax == 3){
+    Detach2.setGoToPage(UnitPage[101]);
+    Detach3.setGoToPage(UnitPage[201]);
+    UnitPage[101].setGoToPage(UnitPage[301]);
+  }
 }
