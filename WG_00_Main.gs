@@ -19,7 +19,6 @@ function fcnMainWG_Master() {
   var OptDualSubmission = ConfigData[0][0]; // If Dual Submission is disabled, look for duplicate instead
   var OptPostResult = ConfigData[1][0];
   var OptPlyrMatchValidation = ConfigData[2][0];
-  var OptTCGBooster = ConfigData[3][0];
   var OptSendEmail = ConfigData[6][0];
   
   // Columns Values and Parameters
@@ -153,7 +152,6 @@ function fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn) {
   var OptDualSubmission = ConfigData[0][0]; // If Dual Submission is disabled, look for duplicate instead
   var OptPostResult = ConfigData[1][0];
   var OptPlyrMatchValidation = ConfigData[2][0];
-  var OptTCGBooster = ConfigData[3][0];
   var OptWargame = ConfigData[4][0];
   var OptSendEmail = ConfigData[6][0];
   
@@ -185,25 +183,14 @@ function fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn) {
   var RspnDataPrcssd = 0;
   var ResponseData;
   var MatchingRspnData;
-  
-  // Card List Variables
-  var CardList = new Array(16); // 0 = Set Name, 1-14 = Card Numbers, 15 = Card 14 is Masterpiece (Y-N)
-  var CardName;
-  
-  // Create Array of 16x4 where each row is Card 1-14 and each column is Card Info
-  var PackData = new Array(16); // 0 = Set Name, 1-14 = Card Numbers, 15 = Card 14 is Masterpiece (Y-N)
-  for(var cardnum = 0; cardnum < 16; cardnum++){
-    PackData[cardnum] = new Array(4); // 0= Card in Pack, 1= Card Number, 2= Card Name, 3= Card Rarity
-    for (var val = 0; val < 4; val++) PackData[cardnum][val] = '';
-  }
 
   // Match Data Variables
   var MatchID; 
   var MatchData = new Array(26); // 0 = MatchID, 1 = Week #, 2 = Winning Player, 3 = Losing Player, 4 = Score, 5 = Winner Points, 6 = Loser Points, 7 = Card Set, 8-21 = Cards, 22 = Masterpiece (Y-N), 23 = Reserved, 24 = MatchPostStatus
   // Create Array of 26x4 where each row is Card 1-14 and each column is Card Info. This Info is only used for rows 8-21
-  for(var cardnum = 0; cardnum < 26; cardnum++){
-    MatchData[cardnum] = new Array(4); // 0= Item Value or Card In Pack, 1= Card Number, 2= Card Name, 3= Card Rarity
-    for (var val = 0; val < 4; val++) MatchData[cardnum][val] = '';
+  for(var y = 0; cardnum < 26; cardnum++){
+    MatchData[y] = new Array(4); // 0= Item Value or Card In Pack, 1= Card Number, 2= Card Name, 3= Card Rarity
+    for (var val = 0; val < 4; val++) MatchData[y][val] = '';
   }
   
   // Email Addresses Array
@@ -213,7 +200,7 @@ function fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn) {
   EmailAddresses[2] = new Array(2);  // 0= Language Preference, 1= email address
   
   EmailAddresses[0][0] = 'English';
-  EmailAddresses[0][1] = 'triadgaminglt@gmail.com';
+  EmailAddresses[0][1] = 'turn1glt@gmail.com';
   EmailAddresses[1][1] = '';
   EmailAddresses[2][1] = '';
 
@@ -231,7 +218,6 @@ function fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn) {
   Logger.log('Dual Submission Option: %s',OptDualSubmission);
   Logger.log('Post Results Option: %s',OptPostResult);
   Logger.log('Player Match Validation Option: %s',OptPlyrMatchValidation);
-  Logger.log('TCG Option: %s',OptTCGBooster);
   Logger.log('Wargame Option: %s',OptWargame);
   Logger.log('Send Email Option: %s',OptSendEmail);
   
