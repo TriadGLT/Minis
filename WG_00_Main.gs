@@ -123,7 +123,7 @@ function fcnMainWG_Master() {
       // Execute Game Results Analysis for as long as there are unprocessed entries
       while (EntriesProcessing >= 1) {
         Logger.log('Entered While Loop');
-        fcnGameResults(ss, shtConfig, ConfigData, shtRspn);
+        fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn);
         EntriesProcessing = shtRspn.getRange(1, ColNbUnprcsdEntries).getValue();
         Logger.log('Nb of Entries After Processing: %s',EntriesProcessing)
       }
@@ -146,7 +146,7 @@ function fcnMainWG_Master() {
 //
 // **********************************************
 
-function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
+function fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn) {
   
   // Data from Configuration File
   // Code Execution Options
@@ -296,7 +296,7 @@ function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
               MatchingRspnData = shtRspn.getRange(MatchingRspn, 1, 1, RspnDataInputs).getValues();
               
               // Execute function to populate Match Result Sheet from processed data
-              MatchData = fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspnData, MatchID, MatchData, shtTest);
+              MatchData = fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRspnData, MatchID, MatchData, shtTest);
               MatchPostStatus = MatchData[25][0];
               
               Logger.log('Match Post Status: %s',MatchPostStatus);
@@ -308,33 +308,7 @@ function fcnGameResults(ss, shtConfig, ConfigData, shtRspn) {
                 
                 // If Game Type is Wargame, Update available amount of Power Level Available
                 if(OptWargame == 'Enabled'){
-                  // fcnUpdatePowerLevel(shtConfig, RspnDataLosr, shtTest);
-                }
-                
-                
-                // If Game Type is TCG, Copy all cards added to the Card Database
-                if (OptTCGBooster == 'Enabled'){
-                  for (var card = 0; card < NbCards; card++){
-                    CardList[card] = ResponseData[0][card+7];
-                  }
-                  // If Pack was opened, Update Card Database and Card Pool for Appropriate player
-                  if (CardList[0] != 'No Pack Opened') {
-                    PackData = fcnUpdateCardDB(shtConfig, RspnDataLosr, CardList, PackData, shtTest);
-                    // Copy all card names to Match Data [7-22]
-                    for (var card = 0; card < NbCards; card++){
-                      MatchData[card+9][0] = PackData[card][0]; // Card in Pack
-                      MatchData[card+9][1] = PackData[card][1]; // Card Number
-                      MatchData[card+9][2] = PackData[card][2]; // Card Name
-                      MatchData[card+9][3] = PackData[card][3]; // Card Rarity
-                      
-                      if (PackData[card][2] == 'Card Name not Found for Card Number') {
-                        Status = subGenErrorMsg(Status, -60,CardList[card]);
-                        PackData[card][2] = Status[1];
-                      }
-                    }
-                  }
-                  // for debug
-                  //shtTest.getRange(20,1,26,4).setValues(MatchData);
+                  fcnUpdateArmyDB(shtConfig, RspnDataLosr, MatchData[7][1], shtTest); // MatchData[7][1] = Loser Power Level Bonus
                 }
               }
               
