@@ -48,10 +48,15 @@ function fcnSetUpForm() {
       .setTitle("Full Name")
       .setRequired(true);
 
-  // Faction name
+  // Faction Keyword 1
   form.addTextItem()
-      .setTitle("Faction")
+      .setTitle("Faction Keyword 1")
       .setRequired(true);  
+
+  // Faction Keyword 2
+  form.addTextItem()
+      .setTitle("Faction Keyword 2")
+      .setRequired(true);
   
   // Warlord name
   form.addTextItem()
@@ -203,10 +208,10 @@ function fcnSetUpForm() {
       ChEnd = AddUnit.createChoice("My Army List is Complete",FormApp.PageNavigationType.SUBMIT);
       
       // If Unit is First Detachment
-      if(DetachNb == 1) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach2);
+      if(DetachNb == 1 && NbDetachMax > 1) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach2);
       
       // If Unit is Second Detachment and there are 3 Detachments
-      if(DetachNb == 2 && NbDetachMax == 3) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach3);
+      if(DetachNb == 2 && NbDetachMax > 2) ChDetach = AddUnit.createChoice("Add Another Detachment",Detach3);
       
       // Sets the Choices depending on the Unit and Detachment
       if(DetachNb < NbDetachMax){

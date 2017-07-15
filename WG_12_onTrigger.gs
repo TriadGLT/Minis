@@ -16,11 +16,11 @@ function onOpenWG_Master() {
   var LeagueMenu = [];
   LeagueMenu.push({name:'Initialize League', functionName:'fcnInitLeague'});
   LeagueMenu.push({name:'Create Army List Form', functionName:'fcnSetUpForm'});
-  LeagueMenu.push({name:'Setup Response Sheets',functionName:'fcnSetupResponseSht'});
+  LeagueMenu.push({name:'Setup Response Sheets', functionName:'fcnSetupResponseSht'});
   LeagueMenu.push({name:'Update Config ID & Links', functionName:'fcnUpdateLinksIDs'});
   LeagueMenu.push(null);
-  LeagueMenu.push({name:'Delete Players DB',functionName:'fcnDelPlayerCardDB'});
-  LeagueMenu.push({name:'Delete Players Pools', functionName:'fcnDelPlayerCardPoolSht'});
+  LeagueMenu.push({name:'Create Players DB', functionName:'fcnGenPlayerArmyDB'});
+  LeagueMenu.push({name:'Delete Players DB', functionName:'fcnDelPlayerArmyDB'});
 
   
   ss.addMenu("Manage League", LeagueMenu);

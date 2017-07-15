@@ -185,14 +185,17 @@ function fcnFindMatchingData(ss, ConfigData, shtRspn, ResponseData, RspnRow, Rsp
 //
 // **********************************************
 
-function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspnData, MatchID, MatchData, shtTest) {
+function fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRspnData, MatchID, MatchData, shtTest) {
   
   // Code Execution Options
   var OptDualSubmission = ConfigData[0][0]; // If Dual Submission is disabled, look for duplicate instead
   var OptPostResult = ConfigData[1][0];
   var OptPlyrMatchValidation = ConfigData[2][0];
-  var OptTCGBooster = ConfigData[3][0];
   var OptWargame = ConfigData[4][0];
+  
+  // Cumulative Results sheet variables
+  var shtCumul;
+  var PwrLvlBonusLosr;
   
   // Match Results Sheet Variables
   var shtRslt = ss.getSheetByName('Match Results');
@@ -206,6 +209,7 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
   var MatchValidLosr = new Array(2); // [0] = Status, [1] = Matches Played by Player used for Error Validation
   var RsltPlyrDataA;
   var RsltPlyrDataB;
+  var DataPostedLosr;
   
   var MatchPostedStatus = 0;
   
@@ -249,37 +253,9 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
     ResultData[0][1] = MatchID; // Match ID
 
     // If Wargame Option is Selected
-    if(OptWargame == 'Enabled' && OptTCGBooster == 'Disabled'){
+    if(OptWargame == 'Enabled'){
       ResultData[0][6] = ResponseData[0][6]; // Winner Points
       ResultData[0][7] = ResponseData[0][7]; // Loser Points
-    }
-    
-    // If TCG Booster Option is Selected
-    if (OptTCGBooster == 'Enabled' && OptWargame == 'Disabled'){
-      
-      // Copies Result Data from Response Data
-      ResultData[0][6] = ResponseData[0][6]; // Score
-      ResultData[0][7] = 2; // Winner Score
-      if (ResponseData[0][6] == '2 - 0') ResultData[0][8] = 0; // Loser Score
-      if (ResponseData[0][6] == '2 - 1') ResultData[0][8] = 1; // Loser Score
-
-      // Copies Card Data      
-      ResultData[0][9] = ResponseData[0][7]; // Expansion Set
-      ResultData[0][10] = ResponseData[0][8]; // Card 1
-      ResultData[0][11] = ResponseData[0][9]; // Card 2
-      ResultData[0][12] = ResponseData[0][10]; // Card 3
-      ResultData[0][13] = ResponseData[0][11]; // Card 4
-      ResultData[0][14] = ResponseData[0][12]; // Card 5
-      ResultData[0][15] = ResponseData[0][13]; // Card 6
-      ResultData[0][16] = ResponseData[0][14]; // Card 8
-      ResultData[0][17] = ResponseData[0][15]; // Card 7
-      ResultData[0][18] = ResponseData[0][16]; // Card 9
-      ResultData[0][19] = ResponseData[0][17]; // Card 10
-      ResultData[0][20] = ResponseData[0][18]; // Card 11
-      ResultData[0][21] = ResponseData[0][19]; // Card 12
-      ResultData[0][22] = ResponseData[0][20]; // Card 13
-      ResultData[0][23] = ResponseData[0][21]; // Card 14 / Foil
-      ResultData[0][24] = ResponseData[0][22]; // Masterpiece (Y/N)
     }
     
     // Sets Data in Match Result Tab
@@ -289,7 +265,13 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
     MatchPostedStatus = 1;
     
     // Post Results in Appropriate Week Number for Both Players
-    fcnPostResultWeek(ss, ConfigData, ResultData, shtTest);
+    // DataPostedLosr is an Array with [0]=Post Status (1=Success) [1]=Loser Row [2]=Power Level Column
+    DataPostedLosr = fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest);
+    
+    // Gets New Power Level / Points Bonus for Loser from Cumulative Results Sheet
+    shtCumul = ss.getSheetByName('Cumulative Results');
+    PwrLvlBonusLosr = shtCumul.getRange(DataPostedLosr[1],DataPostedLosr[2]).getValue();
+    Logger.log('Cumulative Power Level: %s',PwrLvlBonusLosr);
   }
   
   // If Match Validation was not successful, generate Error Status
@@ -331,6 +313,7 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
   MatchData[5][1] = MatchValidLosr[1];   // Losing Player Matches Played
   MatchData[6][0] = ResponseData[0][6];  // Winner Score
   MatchData[7][0] = ResponseData[0][7];  // Loser Score
+  MatchData[7][1] = PwrLvlBonusLosr;
   MatchData[25][0] = MatchPostedStatus;
   
   return MatchData;
@@ -346,35 +329,32 @@ function fcnPostMatchResults(ss, ConfigData, shtRspn, ResponseData, MatchingRspn
 //
 // **********************************************
 
-function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
+function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
 
   // Code Execution Options
-  var OptTCGBooster = ConfigData[3][0];
   var OptWargame = ConfigData[4][0];
-  var ColPackWeekRslt = ConfigData[23][0];
+  var ColPowerLevelBonus = ConfigData[23][0];
+  var ColPlyr = 2;
+  var ColWin = 5;
+  var ColLos = 6;
   
   // function variables
   var shtWeekRslt;
   var shtWeekRsltRng;
   var shtWeekPlyr;
   var shtWeekWinrRec;
-  var shtWeekWinrLoc
+  var shtWeekWinrLoc;
   var shtWeekLosrRec;
-  var shtWeekLosrLoc
-  var shtWeekPackData
+  var shtWeekLosrLoc;
   var shtWeekMaxCol;
-  var shtWeekPlyr
+  var shtWeekPlyr;
   
-  var ColPlyr = 2;
-  var ColWin = 5;
-  var ColLos = 6;
-  var PackLength = 16;
-  var NextPackID = 0;
-  var CfgPowerLevel;
-  var PowerLevel;
+  var cfgPowerLevel = ss.getSheetByName('Config').getRange(8,7).getValue();
+  var LosrPowerLevel;
   
   var WeekWinrRow = 0;
   var WeekLosrRow = 0;
+  var DataPostedLosr = new Array(3);
   
   var MatchLoc = ResultData[0][2];
   var MatchWeek = ResultData[0][3];
@@ -403,11 +383,6 @@ function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
       shtWeekLosrRec = shtWeekRslt.getRange(WeekLosrRow,5,1,2).getValues();
       shtWeekLosrLoc = shtWeekRslt.getRange(WeekLosrRow,9).getValue();
             
-      // If Game Type is TCG
-      if (OptTCGBooster == 'Enabled'){
-      // Get Loser Pack Data
-      shtWeekPackData = shtWeekRslt.getRange(WeekLosrRow,ColPackWeekRslt,1,(PackLength*6)+1).getValues();
-      }
       RsltRow = 37;
     }
   }
@@ -435,31 +410,16 @@ function fcnPostResultWeek(ss, ConfigData, ResultData, shtTest) {
   // If Game Type is Wargame
   if (OptWargame == 'Enabled'){
     // Get Loser Amount of Power Level Bonus and Increase by value from Config file
-    CfgPowerLevel = ss.getSheetByName('Config').getRange(8,7).getValue();
-    PowerLevel = shtWeekRslt.getRange(WeekLosrRow,ColPackWeekRslt).getValue();
-    shtWeekRslt.getRange(WeekLosrRow,ColPackWeekRslt).setValue(CfgPowerLevel + PowerLevel);
+    LosrPowerLevel = shtWeekRslt.getRange(WeekLosrRow,ColPowerLevelBonus).getValue() + cfgPowerLevel;
+    shtWeekRslt.getRange(WeekLosrRow,ColPowerLevelBonus).setValue(LosrPowerLevel);
   }
   
-  
-  // If Game Type is TCG and Punishment Pack has been opened, update Punishment Pack Info
-  if (OptTCGBooster == 'Enabled' && ResultData[0][9] != ''){
-      
-    // Find the next free Punishment Pack space offset
-    if (shtWeekPackData[0][1]  == '' && NextPackID == 0) NextPackID = 1;
-    if (shtWeekPackData[0][17] == '' && NextPackID == 0) NextPackID = 17;
-    if (shtWeekPackData[0][33] == '' && NextPackID == 0) NextPackID = 33;
-    if (shtWeekPackData[0][49] == '' && NextPackID == 0) NextPackID = 49;
-    if (shtWeekPackData[0][65] == '' && NextPackID == 0) NextPackID = 65;
-    if (shtWeekPackData[0][81] == '' && NextPackID == 0) NextPackID = 81;
-    
-    shtWeekPackData[0][0] = shtWeekPackData[0][0] + 1;
-    // Update the Pack data
-    for (var PackDataID = 0; PackDataID < PackLength; PackDataID++){
-      shtWeekPackData[0][PackDataID + NextPackID] = ResultData[0][PackDataID + 9];
-    }
-    // Update the Week Results Sheet with the Pack Info
-    shtWeekRslt.getRange(WeekLosrRow,ColPackWeekRslt,1,(PackLength*6)+1).setValues(shtWeekPackData);
-  }
+  // Populate Data Posted for Loser
+  DataPostedLosr[0]= 1;
+  DataPostedLosr[1]= WeekLosrRow;
+  DataPostedLosr[2]= ColPowerLevelBonus;
+                 
+  return DataPostedLosr;
 }
 
 // **********************************************

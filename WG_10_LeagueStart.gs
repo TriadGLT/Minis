@@ -13,7 +13,8 @@ function fcnInitLeague(){
   
   // Open Spreadsheets
   var shtConfig = ss.getSheetByName('Config');
-  var shtStandings   = ss.getSheetByName('Standings');
+  var shtStandingsEN = ss.getSheetByName('Standings');
+  var shtStandingsFR = ss.getSheetByName('Standings');
   var shtMatchRslt   = ss.getSheetByName('Match Results');
   var shtWeek;
   var shtResponses   = ss.getSheetByName('Responses');
@@ -29,10 +30,11 @@ function fcnInitLeague(){
   var MaxColRspnFR = shtResponsesFR.getMaxColumns();
   
   // Clear Data
-  shtStandings.getRange(6,2,32,6).clearContent();
+  shtStandingsEN.getRange(6,2,32,6).clearContent();
+  shtStandingsFR.getRange(6,2,32,6).clearContent();
   shtMatchRslt.getRange(6,2,MaxRowRslt-5,24).clearContent();
   shtResponses.getRange(2,1,MaxRowRspn-1,MaxColRspn).clearContent();
-  shtResponses.getRange(1,30).setValue(0);
+  shtResponses.getRange(1,16).setValue(0);
   shtResponsesEN.getRange(2,1,MaxRowRspnEN-1,MaxColRspnEN).clearContent();
   shtResponsesFR.getRange(2,1,MaxRowRspnFR-1,MaxColRspnFR).clearContent()
   
@@ -207,14 +209,14 @@ function fcnUpdateLinksIDs(){
 
 
 // **********************************************
-// function fcnGenPlayerCardDB()
+// function fcnGenPlayerArmyDB()
 //
 // This function generates all Card DB for all 
 // players from the Config File
 //
 // **********************************************
 
-function fcnGenPlayerCardDB(){
+function fcnGenPlayerArmyDB(){
   
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -223,101 +225,87 @@ function fcnGenPlayerCardDB(){
   var shtConfig = ss.getSheetByName('Config');
   
   // Card DB Spreadsheet
-  var CardDBShtID = shtConfig.getRange(31, 2).getValue();
-  var ssCardDB = SpreadsheetApp.openById(CardDBShtID);
-  var shtCardDB = ssCardDB.getSheetByName('Template');
-  var shtCardDBNum;
-  var CardDBHeader = shtCardDB.getRange(4,1,4,48).getValues();
+  var ArmyDBShtID = shtConfig.getRange(31, 2).getValue();
+  var ssArmyDB = SpreadsheetApp.openById(ArmyDBShtID);
+  var shtArmyDB = ssArmyDB.getSheetByName('Template');
+  var shtArmyDBNum;
+  var NumSheet = ssArmyDB.getNumSheets();
+  var SheetsArmyDB = ssArmyDB.getSheets();
+  var SheetName;
+  var PlayerFound = 0;
 
   // Players 
   var shtPlayers = ss.getSheetByName('Players'); 
   var NbPlayers = shtPlayers.getRange(2,6).getValue();
-    
-  var NbSheets = ssCardDB.getNumSheets();
   
-  var shtPlyrCardDB;
+  var shtPlyrArmyDB;
   var shtPlyrName;
   var SetNum;
   var PlyrRow;
+
+  var shtPlyrArmyName;
+  var shtPlyrFaction1;
+  var shtPlyrFaction2;
+  var shtPlyrWarlord;
   
-  // Gets the Card Set Data from Config File to Populate the Header
-  for (var col = 0; col < 48; col++){
-    SetNum = CardDBHeader[0][col];
-    switch (SetNum){
-      case 1: 
-        CardDBHeader[1][col] = shtConfig.getRange(7, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(7, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(7, 7).getValue();
-        break;
-      case 2: 
-        CardDBHeader[1][col] = shtConfig.getRange(8, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(8, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(8, 7).getValue();
-        break;
-      case 3: 
-        CardDBHeader[1][col] = shtConfig.getRange(9, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(9, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(9, 7).getValue();
-        break;
-      case 4: 
-        CardDBHeader[1][col] = shtConfig.getRange(10, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(10, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(10, 7).getValue();
-        break;
-      case 5: 
-        CardDBHeader[1][col] = shtConfig.getRange(11, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(11, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(11, 7).getValue();
-        break;
-      case 6: 
-        CardDBHeader[1][col] = shtConfig.getRange(12, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(12, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(12, 7).getValue();
-        break;
-      case 7: 
-        CardDBHeader[1][col] = shtConfig.getRange(13, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(13, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(13, 7).getValue();
-        break;
-      case 8: 
-        CardDBHeader[1][col] = shtConfig.getRange(14, 5).getValue();
-        if (col < 32) CardDBHeader[2][col] = shtConfig.getRange(14, 6).getValue();
-        if (col > 32) CardDBHeader[2][col] = shtConfig.getRange(14, 7).getValue();
-        break;
-    }    
-  }
-  // Set Card Set Names and Codes
-  shtCardDB.getRange(4,1,4,48).setValues(CardDBHeader);
+  // Current Army Values (Power Level or Points
+  var shtConfigValueMode = shtConfig.getRange(6,7).getValue();
+  var shtConfigArmyValue = shtConfig.getRange(10,7).getValue();
   
-  // Loops through each player starting from the first
+  
+  // Gets the Player Info from the Player Sheet to Populate the Header
+  // Loops through each player starting from the last
   for (var plyr = NbPlayers; plyr > 0; plyr--){
     
     // Update the Player Row and Get Player Name from Config File
     PlyrRow = plyr + 2; // 2 is the row where the player list starts
-    shtPlyrName = shtPlayers.getRange(PlyrRow, 2).getValue();
-  
-    // INSERTS TAB BEFORE "Card DB" TAB
-    ssCardDB.insertSheet(shtPlyrName, 0, {template: shtCardDB});
-    shtPlyrCardDB = ssCardDB.getSheets()[0];
-        
-    // Opens the new sheet and modify appropriate data (Player Name, Header)
-    shtPlyrCardDB.getRange(3,3).setValue(shtPlyrName);
-    shtPlyrCardDB.getRange(4,1,4,48).setValues(CardDBHeader);
+    shtPlyrName     = shtPlayers.getRange(PlyrRow, 2).getValue();
+    shtPlyrArmyName = shtPlayers.getRange(PlyrRow, 7).getValue();
+    shtPlyrFaction1 = shtPlayers.getRange(PlyrRow, 8).getValue();
+    shtPlyrFaction2 = shtPlayers.getRange(PlyrRow, 9).getValue();
+    shtPlyrWarlord   = shtPlayers.getRange(PlyrRow,10).getValue();
+    
+    // Resets the Player Found flag before searching
+    PlayerFound = 0;
+            
+    // Look if player exists, if yes, skip, if not, create player
+    for(var sheet = NumSheet - 1; sheet >= 0; sheet --){
+      SheetName = SheetsArmyDB[sheet].getSheetName();
+      Logger.log(SheetName);
+      if (SheetName == shtPlyrName) PlayerFound = 1;
+    }
+
+    Logger.log('PlayerFound:%s',PlayerFound);
+    
+    // If Player is not found, add a tab
+    if(PlayerFound == 0){
+      // INSERTS TAB BEFORE "Card DB" TAB
+      ssArmyDB.insertSheet(shtPlyrName, 0, {template: shtArmyDB});
+      shtPlyrArmyDB = ssArmyDB.getSheets()[0];
+      
+      // Opens the new sheet and modify appropriate data (Player Name, Header)
+      shtPlyrArmyDB.getRange(3,3).setValue(shtPlyrName);
+      shtPlyrArmyDB.getRange(4,3).setValue(shtPlyrArmyName);
+      shtPlyrArmyDB.getRange(5,3).setValue(shtPlyrFaction1 + ', ' + shtPlyrFaction2);
+      shtPlyrArmyDB.getRange(6,3).setValue(shtPlyrWarlord);
+      if (shtConfigValueMode == 'Power Level') shtPlyrArmyDB.getRange(5,9).setValue(shtConfigArmyValue);
+      if (shtConfigValueMode == 'Points')      shtPlyrArmyDB.getRange(5,11).setValue(shtConfigArmyValue);
+    }
   }
-  shtPlyrCardDB = ssCardDB.getSheets()[0];
-  ssCardDB.setActiveSheet(shtPlyrCardDB);
+  shtPlyrArmyDB = ssArmyDB.getSheets()[0];
+  ssArmyDB.setActiveSheet(shtPlyrArmyDB);
 }
 
 
 // **********************************************
-// function fcnGenPlayerCardPoolSht()
+// function fcnGenPlayerArmyListSht()
 //
 // This function generates all Card DB for all 
 // players from the Config File
 //
 // **********************************************
 
-function fcnGenPlayerCardPoolSht(){
+function fcnGenPlayerArmyListSht(){
     
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -326,20 +314,25 @@ function fcnGenPlayerCardPoolSht(){
   var shtConfig = ss.getSheetByName('Config');
   
   // Card Pool Spreadsheet
-  var CardPoolShtEnID = shtConfig.getRange(32, 2).getValue();
-  var CardPoolShtFrID = shtConfig.getRange(33, 2).getValue();
-  var ssCardPoolEn = SpreadsheetApp.openById(CardPoolShtEnID);
-  var ssCardPoolFr = SpreadsheetApp.openById(CardPoolShtFrID);
-  var shtCardPoolEn = ssCardPoolEn.getSheetByName('Template');
-  var shtCardPoolFr = ssCardPoolFr.getSheetByName('Template');
-  var shtCardPoolNum;
+  var ArmyListShtEnID = shtConfig.getRange(32, 2).getValue();
+  var ArmyListShtFrID = shtConfig.getRange(33, 2).getValue();
+  var ssArmyListEn = SpreadsheetApp.openById(ArmyListShtEnID);
+  var ssArmyListFr = SpreadsheetApp.openById(ArmyListShtFrID);
+  var shtArmyListEn = ssArmyListEn.getSheetByName('Template');
+  var shtArmyListFr = ssArmyListFr.getSheetByName('Template');
+  var shtArmyListNum;
+  
+  var NumSheet = ssArmyListEn.getNumSheets();
+  var SheetsArmyDB = ssArmyListEn.getSheets();
+  var SheetName;
+  var PlayerFound = 0;
   
   // Players 
   var shtPlayers = ss.getSheetByName('Players'); 
   var NbPlayers = shtPlayers.getRange(2,6).getValue();
   
-  var shtPlyrCardPoolEn;
-  var shtPlyrCardPoolFr;
+  var shtPlyrArmyListEn;
+  var shtPlyrArmyListFr;
   var shtPlyrName;
   var PlyrRow
   
@@ -349,41 +342,52 @@ function fcnGenPlayerCardPoolSht(){
     // Update the Player Row and Get Player Name from Config File
     PlyrRow = plyr + 2; // 2 is the row where the player list starts
     shtPlyrName = shtPlayers.getRange(PlyrRow, 2).getValue();
+    
+    // Look if player exists, if yes, skip, if not, create player
+    for(var sheet = NumSheet - 1; sheet >= 0; sheet --){
+      SheetName = SheetsArmyDB[sheet].getSheetName();
+      Logger.log(SheetName);
+      if (SheetName == shtPlyrName) PlayerFound = 1;
+    }
   
-    // INSERTS TAB BEFORE "Card DB" TAB
-    // English Version
-    ssCardPoolEn.insertSheet(shtPlyrName, 0, {template: shtCardPoolEn});
-    shtPlyrCardPoolEn = ssCardPoolEn.getSheets()[0];
-       
-    // Opens the new sheet and modify appropriate data (Player Name, Header)
-    shtPlyrCardPoolEn.getRange(2,1).setValue(shtPlyrName);
-    
-    // French Version
-    ssCardPoolFr.insertSheet(shtPlyrName, 0, {template: shtCardPoolFr});
-    shtPlyrCardPoolFr = ssCardPoolFr.getSheets()[0];
-    
-    // Opens the new sheet and modify appropriate data (Player Name, Header)
-    shtPlyrCardPoolFr.getRange(2,1).setValue(shtPlyrName);    
+        
+    // If Player is not found, add a tab
+    if(PlayerFound == 0){
+      // INSERTS TAB BEFORE "Card DB" TAB
+      // English Version
+      ssArmyListEn.insertSheet(shtPlyrName, 0, {template: shtArmyListEn});
+      shtPlyrArmyListEn = ssArmyListEn.getSheets()[0];
+      
+      // Opens the new sheet and modify appropriate data (Player Name, Header)
+      shtPlyrArmyListEn.getRange(2,1).setValue(shtPlyrName);
+      
+      // French Version
+      ssArmyListFr.insertSheet(shtPlyrName, 0, {template: shtArmyListFr});
+      shtPlyrArmyListFr = ssArmyListFr.getSheets()[0];
+      
+      // Opens the new sheet and modify appropriate data (Player Name, Header)
+      shtPlyrArmyListFr.getRange(2,1).setValue(shtPlyrName);    
+    }
   }
   // English Version
-  shtPlyrCardPoolEn = ssCardPoolEn.getSheets()[0];
-  ssCardPoolEn.setActiveSheet(shtPlyrCardPoolEn);
+  shtPlyrArmyListEn = ssArmyListEn.getSheets()[0];
+  ssArmyListEn.setActiveSheet(shtPlyrArmyListEn);
   
   // French Version
-  shtPlyrCardPoolFr = ssCardPoolFr.getSheets()[0];
-  ssCardPoolFr.setActiveSheet(shtPlyrCardPoolFr);
+  shtPlyrArmyListFr = ssArmyListFr.getSheets()[0];
+  ssArmyListFr.setActiveSheet(shtPlyrArmyListFr);
 }
 
 
 // **********************************************
-// function fcnDelPlayerCardDB()
+// function fcnDelPlayerArmyDB()
 //
 // This function deletes all Card DB for all 
 // players from the Config File
 //
 // **********************************************
 
-function fcnDelPlayerCardDB(){
+function fcnDelPlayerArmyDB(){
 
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -392,34 +396,34 @@ function fcnDelPlayerCardDB(){
   var shtConfig = ss.getSheetByName('Config');
   
   // Card DB Spreadsheet
-  var CardDBShtID = shtConfig.getRange(31, 2).getValue();
-  var ssCardDB = SpreadsheetApp.openById(CardDBShtID);
-  var shtTemplate = ssCardDB.getSheetByName('Template');
-  var ssNbSheet = ssCardDB.getNumSheets();
+  var ArmyDBShtID = shtConfig.getRange(31, 2).getValue();
+  var ssArmyDB = SpreadsheetApp.openById(ArmyDBShtID);
+  var shtTemplate = ssArmyDB.getSheetByName('Template');
+  var ssNbSheet = ssArmyDB.getNumSheets();
   
   // Routine Variables
   var shtCurr;
   var shtCurrName;
   
   // Activates Template Sheet
-  ssCardDB.setActiveSheet(shtTemplate);
+  ssArmyDB.setActiveSheet(shtTemplate);
   
   for (var sht = 0; sht < ssNbSheet - 1; sht ++){
-    shtCurr = ssCardDB.getSheets()[0];
+    shtCurr = ssArmyDB.getSheets()[0];
     shtCurrName = shtCurr.getName();
-    if( shtCurrName != 'Template') ssCardDB.deleteSheet(shtCurr);
+    if( shtCurrName != 'Template') ssArmyDB.deleteSheet(shtCurr);
     }
 }
 
 // **********************************************
-// function fcnDelPlayerCardPoolSht()
+// function fcnDelPlayerArmyListSht()
 //
 // This function deletes all Card DB for all 
 // players from the Config File
 //
 // **********************************************
 
-function fcnDelPlayerCardPoolSht(){
+function fcnDelPlayerArmyListSht(){
 
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -428,13 +432,13 @@ function fcnDelPlayerCardPoolSht(){
   var shtConfig = ss.getSheetByName('Config');
   
   // Card Pool Spreadsheet
-  var CardPoolShtIDEn = shtConfig.getRange(32, 2).getValue();
-  var CardPoolShtIDFr = shtConfig.getRange(33, 2).getValue();
-  var ssCardPoolEn = SpreadsheetApp.openById(CardPoolShtIDEn);
-  var ssCardPoolFr = SpreadsheetApp.openById(CardPoolShtIDFr);
-  var shtTemplateEn = ssCardPoolEn.getSheetByName('Template');
-  var shtTemplateFr = ssCardPoolFr.getSheetByName('Template');
-  var ssNbSheet = ssCardPoolEn.getNumSheets();
+  var ArmyListShtIDEn = shtConfig.getRange(32, 2).getValue();
+  var ArmyListShtIDFr = shtConfig.getRange(33, 2).getValue();
+  var ssArmyListEn = SpreadsheetApp.openById(ArmyListShtIDEn);
+  var ssArmyListFr = SpreadsheetApp.openById(ArmyListShtIDFr);
+  var shtTemplateEn = ssArmyListEn.getSheetByName('Template');
+  var shtTemplateFr = ssArmyListFr.getSheetByName('Template');
+  var ssNbSheet = ssArmyListEn.getNumSheets();
   
   // Routine Variables
   var shtCurrEn;
@@ -443,20 +447,20 @@ function fcnDelPlayerCardPoolSht(){
   var shtCurrNameFr;
   
   // Activates Template Sheet
-  ssCardPoolEn.setActiveSheet(shtTemplateEn);
-  ssCardPoolFr.setActiveSheet(shtTemplateFr);
+  ssArmyListEn.setActiveSheet(shtTemplateEn);
+  ssArmyListFr.setActiveSheet(shtTemplateFr);
   
   for (var sht = 0; sht < ssNbSheet - 1; sht ++){
     
     // English Version
-    shtCurrEn = ssCardPoolEn.getSheets()[0];
+    shtCurrEn = ssArmyListEn.getSheets()[0];
     shtCurrNameEn = shtCurrEn.getName();
-    if( shtCurrNameEn != 'Template') ssCardPoolEn.deleteSheet(shtCurrEn);
+    if( shtCurrNameEn != 'Template') ssArmyListEn.deleteSheet(shtCurrEn);
     
     // French Version   
-    shtCurrFr = ssCardPoolFr.getSheets()[0];
+    shtCurrFr = ssArmyListFr.getSheets()[0];
     shtCurrNameFr = shtCurrFr.getName();
-    if( shtCurrNameFr != 'Template') ssCardPoolFr.deleteSheet(shtCurrFr);
+    if( shtCurrNameFr != 'Template') ssArmyListFr.deleteSheet(shtCurrFr);
   }
 }
 
@@ -476,8 +480,8 @@ function fcnSetupResponseSht(){
   // Open Responses Sheets
   var shtOldRespEN = ss.getSheetByName('Responses EN');
   var shtOldRespFR = ss.getSheetByName('Responses FR');
-  var shtNewRespEN = ss.getSheetByName('Form Responses 21');
-  var shtNewRespFR = ss.getSheetByName('Form Responses 22');
+  var shtNewRespEN = ss.getSheetByName('Form Responses EN');
+  var shtNewRespFR = ss.getSheetByName('Form Responses FR');
     
   var OldRespMaxCol = shtOldRespEN.getMaxColumns();
   var NewRespMaxRow = shtNewRespEN.getMaxRows();
@@ -486,7 +490,7 @@ function fcnSetupResponseSht(){
   // Copy Header from Old to New sheet - Loop to Copy Value and Format from cell to cell, copy formula (or set) in last cell
   for (var col = 1; col <= OldRespMaxCol; col++){
     // Insert Column if it doesn't exist (col >=24)
-    if (col >= 24 && col < OldRespMaxCol){
+    if (col >= 9 && col < OldRespMaxCol){
       shtNewRespEN.insertColumnAfter(col);
       shtNewRespFR.insertColumnAfter(col);
     }
@@ -497,11 +501,11 @@ function fcnSetupResponseSht(){
     shtNewRespEN.setColumnWidth(col,ColWidth);
     shtNewRespFR.setColumnWidth(col,ColWidth);
   }
-  // Hides Columns 25, 27-30
-  shtNewRespEN.hideColumns(25);
-  shtNewRespEN.hideColumns(27,4);
-  shtNewRespFR.hideColumns(25);
-  shtNewRespFR.hideColumns(27,4);
+  // Hides Columns 10, 12-15
+  shtNewRespEN.hideColumns(10);
+  shtNewRespEN.hideColumns(12,4);
+  shtNewRespFR.hideColumns(10);
+  shtNewRespFR.hideColumns(12,4);
   
   // Deletes all Rows but 1-2
   shtNewRespEN.deleteRows(3, NewRespMaxRow - 2);
