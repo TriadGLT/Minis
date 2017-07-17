@@ -170,7 +170,7 @@ function fcnMainWG_Master() {
     Logger.log('Submission Email Not Valid : %s',Email)
     // Send Log by email
     var recipient = Session.getActiveUser().getEmail();
-    var subject = 'TCG Booster League Log';
+    var subject = 'Wargaming League Log';
     var body = Logger.getLog();
     MailApp.sendEmail(recipient, subject, body);  
   }
