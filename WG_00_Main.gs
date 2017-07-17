@@ -73,6 +73,7 @@ function fcnMainWG_Master() {
       DataCopied = 1;
       shtRspnEN.getRange(RspnRow, ColDataCopied).setValue(DataCopied);
       shtRspnEN.getRange(RspnRow, ColNextEmptyRow).setValue('=IF(INDIRECT("R[0]C[-16]",FALSE)<>"",1,"")');
+      shtRspnEN.getRange(RspnRow, 1, 1).setBackground('grey');
     }
     // If TimeStamp is null, Delete Row and start over
     if (TimeStamp == '' && RspnRow < RspnMaxRowsEN) {
@@ -84,6 +85,7 @@ function fcnMainWG_Master() {
       DataCopied = -1;
       shtRspnEN.getRange(RspnRow, ColDataCopied).setValue(DataCopied);
       shtRspnEN.getRange(RspnRow, ColNextEmptyRow).setValue('=IF(INDIRECT("R[0]C[-16]",FALSE)<>"",1,"")');
+      shtRspnEN.getRange(RspnRow, 1, 1).setBackground('grey');
     }
     // If Data is copied or Email is not Valid or TimeStamp is null, Exit loop Responses EN to process data
     if (DataCopied == 1 || DataCopied == -1 || (TimeStamp == '' && RspnRow >= RspnMaxRowsEN)) {
@@ -116,6 +118,7 @@ function fcnMainWG_Master() {
         DataCopied = 1;
         shtRspnFR.getRange(RspnRow, ColDataCopied).setValue(DataCopied);
         shtRspnFR.getRange(RspnRow, ColNextEmptyRow).setValue('=IF(INDIRECT("R[0]C[-16]",FALSE)<>"",1,"")');
+        shtRspnFR.getRange(RspnRow, 1, 1).setBackground('grey');
       }
       // If TimeStamp is null, Delete Row and start over
       if (TimeStamp == '' && RspnRow < RspnMaxRowsFR) {
@@ -127,6 +130,7 @@ function fcnMainWG_Master() {
         DataCopied = -1;
         shtRspnFR.getRange(RspnRow, ColDataCopied).setValue(DataCopied);
         shtRspnFR.getRange(RspnRow, ColNextEmptyRow).setValue('=IF(INDIRECT("R[0]C[-16]",FALSE)<>"",1,"")');
+        shtRspnFR.getRange(RspnRow, 1, 1).setBackground('grey');
       }
       // If Data is copied, Exit loop Responses FR to process data
       if (DataCopied == 1 || DataCopied == -1 || (TimeStamp == '' && RspnRow >= RspnMaxRowsFR)) {

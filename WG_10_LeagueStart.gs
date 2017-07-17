@@ -490,7 +490,7 @@ function fcnSetupResponseSht(){
   // Copy Header from Old to New sheet - Loop to Copy Value and Format from cell to cell, copy formula (or set) in last cell
   for (var col = 1; col <= OldRespMaxCol; col++){
     // Insert Column if it doesn't exist (col >=24)
-    if (col >= 9 && col < OldRespMaxCol){
+    if (col >= 8 && col < OldRespMaxCol){
       shtNewRespEN.insertColumnAfter(col);
       shtNewRespFR.insertColumnAfter(col);
     }
@@ -501,11 +501,11 @@ function fcnSetupResponseSht(){
     shtNewRespEN.setColumnWidth(col,ColWidth);
     shtNewRespFR.setColumnWidth(col,ColWidth);
   }
-  // Hides Columns 10, 12-15
-  shtNewRespEN.hideColumns(10);
-  shtNewRespEN.hideColumns(12,4);
-  shtNewRespFR.hideColumns(10);
-  shtNewRespFR.hideColumns(12,4);
+  // Hides Columns 9, 11-14
+  shtNewRespEN.hideColumns(9);
+  shtNewRespEN.hideColumns(11,4);
+  shtNewRespFR.hideColumns(9);
+  shtNewRespFR.hideColumns(11,4);
   
   // Deletes all Rows but 1-2
   shtNewRespEN.deleteRows(3, NewRespMaxRow - 2);

@@ -73,12 +73,6 @@ function fcnSendConfirmEmailEN(shtConfig, Address, MatchData) {
   var Winr    = MatchData[4][0];
   var Losr    = MatchData[5][0];
   
-  // Add Masterpiece mention if necessary
-  if (MatchData[24][2] == 'Last Card is Masterpiece'){
-    var Masterpiece = MatchData[23][2];
-    MatchData[23][2] += ' (Masterpiece)' 
-  }
-
   // Set Email Subject
   EmailSubject = Location + ' ' + LeagueNameEN + " - Week " + Week + " - Match Result" ;
     
@@ -269,12 +263,6 @@ function fcnSendConfirmEmailFR(shtConfig, Address, MatchData) {
   var Week    = MatchData[3][0];
   var Winr    = MatchData[4][0];
   var Losr    = MatchData[5][0];
-  
-  // Add Masterpiece mention if necessary
-  if (MatchData[24][2] == 'Last Card is Masterpiece'){
-    var Masterpiece = MatchData[23][2];
-    MatchData[23][2] += ' (Masterpiece)' 
-  }
 
   // Set Email Subject
   EmailSubject = Location + ' ' + LeagueNameFR + " - Week " + Week + " - Rapport de Match" ;
@@ -487,11 +475,6 @@ function fcnSendFeedbackEmail(shtConfig, Address, MatchData, Feedback) {
 
 function subMatchReportTable(EmailMessage, Headers, MatchData, Param){
   
-  var Item = Headers[25][0];
-  var CardNumber = Headers[26][0];
-  var CardName = Headers[27][0];
-  var CardRarity = Headers[28][0];
-    
   for(var row=0; row<24; ++row){
 
     if(row == 1) ++row;
@@ -507,24 +490,7 @@ function subMatchReportTable(EmailMessage, Headers, MatchData, Param){
     }
     
     // End of first Table
-    if(row == 7) EmailMessage += '</table><br>';
-    
-    // Start of Pack Table
-    if(row == 9 && Param == 1) {
-      EmailMessage += 'Booster Pack Content<br><br><font size="4"><b>'+MatchData[row][0]+
-        '</b></font><br><table style="border-collapse:collapse;" border = 1 cellpadding = 5><th>'+Item+'</th><th>'+CardNumber+'</th><th>'+CardName+'</th><th>'+CardRarity+'</th>';
-    }
-    
-    // Pack Data
-    if(row > 9 && Param == 1) {
-      EmailMessage += '<tr><td>'+Headers[row][0]+'</td><td><center>'+MatchData[row][1]+'</td><td>'+MatchData[row][2]+'</td><td><center>'+MatchData[row][3]+'</td></tr>';
-    }
-    
-    // If Param is Not 1, Error is Present 
-    if(row == 9 && Param != 1) {
-      row = 24;
-    }
-    
+    if(row == 7) EmailMessage += '</table><br>';   
   }
   return EmailMessage +'</table>';
 }

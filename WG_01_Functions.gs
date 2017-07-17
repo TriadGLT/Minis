@@ -229,6 +229,7 @@ function fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRs
   ResultData[0][3] = ResponseData[0][3];  // Week/Round Number
   ResultData[0][4] = ResponseData[0][4];  // Winning Player
   ResultData[0][5] = ResponseData[0][5];  // Losing Player
+  ResultData[0][6] = ResponseData[0][6];  // Game is Tie
   
   // If option is enabled, Validate if players are allowed to post results (look for number of games played versus total amount of games allowed
   if (OptPlyrMatchValidation == 'Enabled'){
@@ -251,12 +252,6 @@ function fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRs
     
     // Copies Match ID
     ResultData[0][1] = MatchID; // Match ID
-
-    // If Wargame Option is Selected
-    if(OptWargame == 'Enabled'){
-      ResultData[0][6] = ResponseData[0][6]; // Winner Points
-      ResultData[0][7] = ResponseData[0][7]; // Loser Points
-    }
     
     // Sets Data in Match Result Tab
     RsltRng.setValues(ResultData);
@@ -311,9 +306,8 @@ function fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRs
   MatchData[4][1] = MatchValidWinr[1];   // Winning Player Matches Played
   MatchData[5][0] = ResponseData[0][5];  // Losing Player
   MatchData[5][1] = MatchValidLosr[1];   // Losing Player Matches Played
-  MatchData[6][0] = ResponseData[0][6];  // Winner Score
-  MatchData[7][0] = ResponseData[0][7];  // Loser Score
-  MatchData[7][1] = PwrLvlBonusLosr;
+  MatchData[5][2] = PwrLvlBonusLosr;
+  MatchData[6][0] = ResponseData[0][6];  // Game is Tie
   MatchData[25][0] = MatchPostedStatus;
   
   return MatchData;
@@ -337,6 +331,7 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
   var ColPlyr = 2;
   var ColWin = 5;
   var ColLos = 6;
+  var ColLocation = 10;
   
   // function variables
   var shtWeekRslt;
@@ -360,6 +355,7 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
   var MatchWeek = ResultData[0][3];
   var MatchDataWinr = ResultData[0][4];
   var MatchDataLosr = ResultData[0][5];
+  var MatchDataTie  = ResultData[0][6];
   
   // Selects the appropriate Week
   var Week = 'Week'+MatchWeek;
@@ -377,34 +373,52 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
     if (shtWeekPlyr[RsltRow - 5][0] == MatchDataLosr) WeekLosrRow = RsltRow;
     
     if (WeekWinrRow != '' && WeekLosrRow != '') {
-      // Get Winner and Loser Match Record 
-      shtWeekWinrRec = shtWeekRslt.getRange(WeekWinrRow,5,1,2).getValues();
-      shtWeekWinrLoc = shtWeekRslt.getRange(WeekWinrRow,9).getValue();
-      shtWeekLosrRec = shtWeekRslt.getRange(WeekLosrRow,5,1,2).getValues();
-      shtWeekLosrLoc = shtWeekRslt.getRange(WeekLosrRow,9).getValue();
+      // Get Winner and Loser Match Record, 3 values, Win, Loss, Ties
+      shtWeekWinrRec = shtWeekRslt.getRange(WeekWinrRow,5,1,3).getValues();
+      shtWeekWinrLoc = shtWeekRslt.getRange(WeekWinrRow,ColLocation).getValue();
+      shtWeekLosrRec = shtWeekRslt.getRange(WeekLosrRow,5,1,3).getValues();
+      shtWeekLosrLoc = shtWeekRslt.getRange(WeekLosrRow,ColLocation).getValue();
             
       RsltRow = 37;
     }
   }
   
-  // Update Winning Player Results
-  shtWeekWinrRec[0][0] = shtWeekWinrRec[0][0] + 1;
+  // Fill Empty Cells for both Winner and Loser
+  if (shtWeekWinrRec[0][0] == '') shtWeekWinrRec[0][0] = 0; 
   if (shtWeekWinrRec[0][1] == '') shtWeekWinrRec[0][1] = 0; 
+  if (shtWeekWinrRec[0][2] == '') shtWeekWinrRec[0][2] = 0; 
+  if (shtWeekLosrRec[0][0] == '') shtWeekLosrRec[0][0] = 0; 
+  if (shtWeekLosrRec[0][1] == '') shtWeekLosrRec[0][1] = 0; 
+  if (shtWeekLosrRec[0][2] == '') shtWeekLosrRec[0][2] = 0; 
   
-  // Update Losing Player Results and Location Matches
-  shtWeekLosrRec[0][1] = shtWeekLosrRec[0][1] + 1;
-  if (shtWeekLosrRec[0][0] == '') shtWeekLosrRec[0][0] = 0;
+  // If match is not a Tie
   
+  if(ResultData[0][6] == 'No' || ResultData[0][6] == 'Non'){
+    // Update Winning Player Results
+    shtWeekWinrRec[0][0] = shtWeekWinrRec[0][0] + 1;
+    // Update Losing Player Results
+    shtWeekLosrRec[0][1] = shtWeekLosrRec[0][1] + 1;
+  }
+
+  // If match is a Tie
+  if(ResultData[0][6] == 'Yes' || ResultData[0][6] == 'Oui'){
+    // Update "Winning" Player Results
+    shtWeekWinrRec[0][2] = shtWeekWinrRec[0][2] + 1;
+    // Update "Losing" Player Results
+    shtWeekLosrRec[0][2] = shtWeekLosrRec[0][2] + 1;
+    }
+  
+  // Updates Match Location
   if (MatchLoc == 'Yes' || MatchLoc == 'Oui') {
     shtWeekWinrLoc = shtWeekWinrLoc + 1;
     shtWeekLosrLoc = shtWeekLosrLoc + 1;
   }
   
   // Update the Week Results Sheet
-  shtWeekRslt.getRange(WeekWinrRow,5,1,2).setValues(shtWeekWinrRec);
-  shtWeekRslt.getRange(WeekWinrRow,9).setValue(shtWeekWinrLoc);
-  shtWeekRslt.getRange(WeekLosrRow,5,1,2).setValues(shtWeekLosrRec);
-  shtWeekRslt.getRange(WeekLosrRow,9).setValue(shtWeekLosrLoc);
+  shtWeekRslt.getRange(WeekWinrRow,5,1,3).setValues(shtWeekWinrRec);
+  shtWeekRslt.getRange(WeekWinrRow,ColLocation).setValue(shtWeekWinrLoc);
+  shtWeekRslt.getRange(WeekLosrRow,5,1,3).setValues(shtWeekLosrRec);
+  shtWeekRslt.getRange(WeekLosrRow,ColLocation).setValue(shtWeekLosrLoc);
   
 
   // If Game Type is Wargame
