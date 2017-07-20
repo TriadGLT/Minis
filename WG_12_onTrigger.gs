@@ -10,7 +10,7 @@ function onOpenWG_Master() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
   var AnalyzeDataMenu  = [];
-  AnalyzeDataMenu.push({name: 'Analyze New Match Entry', functionName: 'fcnMain'});
+  AnalyzeDataMenu.push({name: 'Analyze New Match Entry', functionName: 'fcnMainWG_Master'});
   AnalyzeDataMenu.push({name: 'Reset Match Entries', functionName:'fcnResetLeagueMatch'});
   
   var LeagueMenu = [];
@@ -19,8 +19,10 @@ function onOpenWG_Master() {
   LeagueMenu.push({name:'Setup Response Sheets', functionName:'fcnSetupResponseSht'});
   LeagueMenu.push({name:'Update Config ID & Links', functionName:'fcnUpdateLinksIDs'});
   LeagueMenu.push(null);
-  LeagueMenu.push({name:'Create Players DB', functionName:'fcnGenPlayerArmyDB'});
-  LeagueMenu.push({name:'Delete Players DB', functionName:'fcnDelPlayerArmyDB'});
+  LeagueMenu.push({name:'Create Players Army DB', functionName:'fcnGenPlayerArmyDB'});
+  LeagueMenu.push({name:'Delete Players Army DB', functionName:'fcnDelPlayerArmyDB'});
+  LeagueMenu.push({name:'Create Players Army Lists', functionName:'fcnGenPlayerArmyList'});
+  LeagueMenu.push({name:'Delete Players Army Lists', functionName:'fcnDelPlayerArmyList'});
 
   
   ss.addMenu("Manage League", LeagueMenu);

@@ -11,7 +11,7 @@
 //
 // **********************************************
 
-function fcnFindDuplicateData(ss, ConfigData, shtRspn, ResponseData, RspnRow, RspnStartRow, RspnMaxRows, RspnDataInputs, shtTest) {
+function fcnFindDuplicateData(ss, ConfigData, shtRspn, ResponseData, RspnRow, RspnMaxRows, shtTest) {
 
   // Columns Values and Parameters
   var ColMatchID = ConfigData[14][0];
@@ -54,8 +54,8 @@ function fcnFindDuplicateData(ss, ConfigData, shtRspn, ResponseData, RspnRow, Rs
       EntryWeek = EntryData[0][3];
       EntryWinr = EntryData[0][4];
       EntryLosr = EntryData[0][5];
-      EntryMatchID = EntryData[0][24];
-      EntryPrcssd = EntryData[0][25];
+      EntryMatchID = EntryData[0][8];
+      EntryPrcssd = EntryData[0][9];
             
       // If both rows are different, the Data Entry was processed and was compiled in the Match Results (Match as a Match ID), Look for player entry combination
       if (EntryRow != RspnRow && EntryPrcssd == 1 && EntryMatchID != ''){
@@ -89,7 +89,7 @@ function fcnFindDuplicateData(ss, ConfigData, shtRspn, ResponseData, RspnRow, Rs
 //
 // **********************************************
 
-function fcnFindMatchingData(ss, ConfigData, shtRspn, ResponseData, RspnRow, RspnStartRow, RspnMaxRows, RspnDataInputs, shtTest) {
+function fcnFindMatchingData(ss, ConfigData, shtRspn, ResponseData, RspnRow, RspnMaxRows, shtTest) {
 
   // Code Execution Options
   var OptDualSubmission = ConfigData[0][0]; // If Dual Submission is disabled, look for duplicate instead
@@ -203,7 +203,7 @@ function fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRs
   var shtRsltMaxCol = shtRslt.getMaxColumns();
   var RsltLastResultRowRng = shtRslt.getRange(3, 4);
   var RsltLastResultRow = RsltLastResultRowRng.getValue() + 1;
-  var RsltRng = shtRslt.getRange(RsltLastResultRow, 1, 1, shtRsltMaxCol-1);
+  var RsltRng = shtRslt.getRange(RsltLastResultRow, 1, 1, shtRsltMaxCol);
   var ResultData = RsltRng.getValues();
   var MatchValidWinr = new Array(2); // [0] = Status, [1] = Matches Played by Player used for Error Validation
   var MatchValidLosr = new Array(2); // [0] = Status, [1] = Matches Played by Player used for Error Validation
@@ -254,6 +254,7 @@ function fcnPostMatchResultsWG(ss, ConfigData, shtRspn, ResponseData, MatchingRs
     ResultData[0][1] = MatchID; // Match ID
     
     // Sets Data in Match Result Tab
+    ResultData[0][shtRsltMaxCol-1] = '= if(INDIRECT("R[0]C[-6]",FALSE)<>"",1,"")';
     RsltRng.setValues(ResultData);
     
     // Update the Match Posted Status
@@ -349,6 +350,7 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
   
   var WeekWinrRow = 0;
   var WeekLosrRow = 0;
+  var WeekMatchTie = 0; // Match is not a Tie by default
   var DataPostedLosr = new Array(3);
   
   var MatchLoc = ResultData[0][2];
@@ -391,9 +393,13 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
   if (shtWeekLosrRec[0][1] == '') shtWeekLosrRec[0][1] = 0; 
   if (shtWeekLosrRec[0][2] == '') shtWeekLosrRec[0][2] = 0; 
   
-  // If match is not a Tie
+  // Match Tie Result
+  if(ResultData[0][6] == 'Yes' || ResultData[0][6] == 'Oui'){
+    WeekMatchTie = 1;  
+  }
   
-  if(ResultData[0][6] == 'No' || ResultData[0][6] == 'Non'){
+  // If match is not a Tie
+  if(WeekMatchTie == 0){
     // Update Winning Player Results
     shtWeekWinrRec[0][0] = shtWeekWinrRec[0][0] + 1;
     // Update Losing Player Results
@@ -401,7 +407,7 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
   }
 
   // If match is a Tie
-  if(ResultData[0][6] == 'Yes' || ResultData[0][6] == 'Oui'){
+  if(WeekMatchTie == 1){
     // Update "Winning" Player Results
     shtWeekWinrRec[0][2] = shtWeekWinrRec[0][2] + 1;
     // Update "Losing" Player Results
@@ -422,7 +428,7 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
   
 
   // If Game Type is Wargame
-  if (OptWargame == 'Enabled'){
+  if (WeekMatchTie == 0){
     // Get Loser Amount of Power Level Bonus and Increase by value from Config file
     LosrPowerLevel = shtWeekRslt.getRange(WeekLosrRow,ColPowerLevelBonus).getValue() + cfgPowerLevel;
     shtWeekRslt.getRange(WeekLosrRow,ColPowerLevelBonus).setValue(LosrPowerLevel);
@@ -444,22 +450,31 @@ function fcnPostResultWeekWG(ss, ConfigData, ResultData, shtTest) {
 //
 // **********************************************
 
-function fcnUpdateStandings(ss){
+function fcnUpdateStandings(ss, shtConfig){
 
   var shtCumul = ss.getSheetByName('Cumulative Results');
   var shtStand = ss.getSheetByName('Standings');
   
+  var SortVal = shtConfig.getRange(10,9).getValue();
+  
   // Get Player Record Range
-  var RngCumul = shtCumul.getRange(5,2,32,6);
-  var RngStand = shtStand.getRange(6,2,32,6);
+  var RngCumul = shtCumul.getRange(5,2,32,7);
+  var RngStand = shtStand.getRange(6,2,32,7);
   
   // Get Cumulative Results Values and puts them in the Standings Values
   var ValCumul = RngCumul.getValues();
   RngStand.setValues(ValCumul);
-
-  // Sorts the Standings Values by Win % (column 7) and Matches Played (column 4)
-  RngStand.sort([{column: 7, ascending: false},{column: 4, ascending: false}]);
-
+  
+  
+  // Sorts the Standings Values by Number of Wins (column 5) and Win% (column 8)
+  if(SortVal == 'WinNb'){
+    RngStand.sort([{column: 5, ascending: false},{column: 8, ascending: false}]);
+  }
+  
+  // Sorts the Standings Values by Win % (column 8) and Matches Played (column 4)
+  if(SortVal == 'Win%'){
+    RngStand.sort([{column: 8, ascending: false},{column: 4, ascending: false}]);
+  }
 }
 
 // **********************************************

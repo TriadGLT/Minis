@@ -22,6 +22,7 @@ function fcnInitLeague(){
   var shtResponsesFR = ss.getSheetByName('Responses FR');
   
   var MaxRowRslt = shtMatchRslt.getMaxRows();
+  var MaxColRslt = shtMatchRslt.getMaxColumns();
   var MaxRowRspn = shtResponses.getMaxRows();
   var MaxColRspn = shtResponses.getMaxColumns();
   var MaxRowRspnEN = shtResponsesEN.getMaxRows();
@@ -29,20 +30,23 @@ function fcnInitLeague(){
   var MaxRowRspnFR = shtResponsesFR.getMaxRows();
   var MaxColRspnFR = shtResponsesFR.getMaxColumns();
   
+  var ColMatchID = shtConfig.getRange(17,9).getValue();
+  var ColMatchIDLastVal = shtConfig.getRange(22,9).getValue();
+  
   // Clear Data
-  shtStandingsEN.getRange(6,2,32,6).clearContent();
-  shtStandingsFR.getRange(6,2,32,6).clearContent();
-  shtMatchRslt.getRange(6,2,MaxRowRslt-5,24).clearContent();
+  shtStandingsEN.getRange(6,2,32,7).clearContent();
+  shtStandingsFR.getRange(6,2,32,7).clearContent();
+  shtMatchRslt.getRange(6,2,MaxRowRslt-5,MaxColRslt-2).clearContent();
   shtResponses.getRange(2,1,MaxRowRspn-1,MaxColRspn).clearContent();
-  shtResponses.getRange(1,16).setValue(0);
+  shtResponses.getRange(1,ColMatchIDLastVal).setValue(0);
   shtResponsesEN.getRange(2,1,MaxRowRspnEN-1,MaxColRspnEN).clearContent();
   shtResponsesFR.getRange(2,1,MaxRowRspnFR-1,MaxColRspnFR).clearContent()
   
   // Week Results
   for (var WeekNum = 1; WeekNum <= 8; WeekNum++){
     shtWeek = ss.getSheetByName('Week'+WeekNum);
-    shtWeek.getRange(5,5,32,2).clearContent();
-    shtWeek.getRange(5,8,32,106-8).clearContent();
+    shtWeek.getRange(5,5,32,3).clearContent();
+    shtWeek.getRange(5,9,32,3).clearContent();
   }
 
   Logger.log('League Data Cleared');
@@ -52,14 +56,14 @@ function fcnInitLeague(){
   Logger.log('Standings Updated');
   
   // Clear Players DB and Card Pools
-  fcnDelPlayerCardDB();
-  fcnDelPlayerCardPoolSht();
-  Logger.log('Card DB and Card Pool Cleared');
+  fcnDelPlayerArmyDB();
+  fcnDelPlayerArmyList();
+  Logger.log('Army DB and Army Lists Cleared');
   
   // Generate Players DB and Card Pools
-  fcnGenPlayerCardDB();
-  fcnGenPlayerCardPoolSht();
-  Logger.log('Card DB and Card Pool Generated');
+  fcnGenPlayerArmyDB();
+  fcnGenPlayerArmyList();
+  Logger.log('Army DB and Army Lists Generated');
 }
 
 // **********************************************
@@ -85,6 +89,7 @@ function fcnResetLeagueMatch(){
   var shtResponsesFR = ss.getSheetByName('Responses FR');
   
   var MaxRowRslt = shtMatchRslt.getMaxRows();
+  var MaxColRslt = shtMatchRslt.getMaxColumns();
   var MaxRowRspn = shtResponses.getMaxRows();
   var MaxColRspn = shtResponses.getMaxColumns();
   var MaxRowRspnEN = shtResponsesEN.getMaxRows();
@@ -92,19 +97,22 @@ function fcnResetLeagueMatch(){
   var MaxRowRspnFR = shtResponsesFR.getMaxRows();
   var MaxColRspnFR = shtResponsesFR.getMaxColumns();
   
+  var ColMatchID = shtConfig.getRange(17,9).getValue();
+  var ColMatchIDLastVal = shtConfig.getRange(22,9).getValue();
+  
   // Clear Data
-  shtStandings.getRange(6,2,32,6).clearContent();
-  shtMatchRslt.getRange(6,2,MaxRowRslt-5,24).clearContent();
+  shtStandings.getRange(6,2,32,7).clearContent();
+  shtMatchRslt.getRange(6,2,MaxRowRslt-5,MaxColRslt-2).clearContent();
   shtResponses.getRange(2,1,MaxRowRspn-1,MaxColRspn).clearContent();
-  shtResponses.getRange(1,30).setValue(0);
-  shtResponsesEN.getRange(2,25,MaxRowRspnEN-1,7).clearContent();
-  shtResponsesFR.getRange(2,25,MaxRowRspnFR-1,7).clearContent()
+  shtResponses.getRange(1,ColMatchIDLastVal).setValue(0);
+  shtResponsesEN.getRange(2,ColMatchID,MaxRowRspnEN-1,7).clearContent();
+  shtResponsesFR.getRange(2,ColMatchID,MaxRowRspnFR-1,7).clearContent()
   
   // Week Results
   for (var WeekNum = 1; WeekNum <= 8; WeekNum++){
     shtWeek = ss.getSheetByName('Week'+WeekNum);
-    shtWeek.getRange(5,5,32,2).clearContent();
-    shtWeek.getRange(5,8,32,106-8).clearContent();
+    shtWeek.getRange(5,5,32,3).clearContent();
+    shtWeek.getRange(5,9,32,3).clearContent();
   }
 
   Logger.log('League Data Cleared');
@@ -224,7 +232,7 @@ function fcnGenPlayerArmyDB(){
   // Config Spreadsheet
   var shtConfig = ss.getSheetByName('Config');
   
-  // Card DB Spreadsheet
+  // Army DB Spreadsheet
   var ArmyDBShtID = shtConfig.getRange(31, 2).getValue();
   var ssArmyDB = SpreadsheetApp.openById(ArmyDBShtID);
   var shtArmyDB = ssArmyDB.getSheetByName('Template');
@@ -290,6 +298,17 @@ function fcnGenPlayerArmyDB(){
       shtPlyrArmyDB.getRange(6,3).setValue(shtPlyrWarlord);
       if (shtConfigValueMode == 'Power Level') shtPlyrArmyDB.getRange(5,9).setValue(shtConfigArmyValue);
       if (shtConfigValueMode == 'Points')      shtPlyrArmyDB.getRange(5,11).setValue(shtConfigArmyValue);
+      
+      // Hides the unused columns according to the Army Value (Power Level or Points)
+      if (shtConfigValueMode == 'Power Level') {
+        shtPlyrArmyDB.hideColumns( 6, 3);
+        shtPlyrArmyDB.hideColumns(11, 2);
+      }
+      if (shtConfigValueMode == 'Points') {
+        shtPlyrArmyDB.hideColumns( 5, 1);
+        shtPlyrArmyDB.hideColumns( 9, 2);
+      }
+      
     }
   }
   shtPlyrArmyDB = ssArmyDB.getSheets()[0];
@@ -305,15 +324,27 @@ function fcnGenPlayerArmyDB(){
 //
 // **********************************************
 
-function fcnGenPlayerArmyListSht(){
+function fcnGenPlayerArmyList(){
     
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
   // Config Spreadsheet
   var shtConfig = ss.getSheetByName('Config');
+  var shtConfigValueMode = shtConfig.getRange(6,7).getValue();
   
-  // Card Pool Spreadsheet
+  // Army DB Spreadsheet
+  var ArmyDBShtID = shtConfig.getRange(31, 2).getValue();
+  var ssArmyDB = SpreadsheetApp.openById(ArmyDBShtID);
+  var shtArmyDBTemplate = ssArmyDB.getSheetByName('Template');
+  var shtArmyDBMaxRows = shtArmyDBTemplate.getMaxRows();
+  var shtArmyDBMaxCols = shtArmyDBTemplate.getMaxColumns();
+  Logger.log('shtArmyDBMaxRows: %s',shtArmyDBMaxRows);
+  Logger.log('shtArmyDBMaxCols: %s',shtArmyDBMaxCols);
+  
+  var shtArmyDBVal;
+  
+  // Army Lists Spreadsheet
   var ArmyListShtEnID = shtConfig.getRange(32, 2).getValue();
   var ArmyListShtFrID = shtConfig.getRange(33, 2).getValue();
   var ssArmyListEn = SpreadsheetApp.openById(ArmyListShtEnID);
@@ -346,36 +377,59 @@ function fcnGenPlayerArmyListSht(){
     // Look if player exists, if yes, skip, if not, create player
     for(var sheet = NumSheet - 1; sheet >= 0; sheet --){
       SheetName = SheetsArmyDB[sheet].getSheetName();
-      Logger.log(SheetName);
       if (SheetName == shtPlyrName) PlayerFound = 1;
     }
-  
-        
+          
     // If Player is not found, add a tab
     if(PlayerFound == 0){
       // INSERTS TAB BEFORE "Card DB" TAB
+      
       // English Version
+      shtArmyDBVal = ssArmyDB.getSheetByName(shtPlyrName).getRange(1, 1, shtArmyDBMaxRows, shtArmyDBMaxCols).getValues();
       ssArmyListEn.insertSheet(shtPlyrName, 0, {template: shtArmyListEn});
       shtPlyrArmyListEn = ssArmyListEn.getSheets()[0];
       
       // Opens the new sheet and modify appropriate data (Player Name, Header)
-      shtPlyrArmyListEn.getRange(2,1).setValue(shtPlyrName);
+      shtPlyrArmyListEn.getRange(1, 1, shtArmyDBMaxRows, shtArmyDBMaxCols).setValues(shtArmyDBVal);
+      
+      // Hides the unused columns according to the Army Value (Power Level or Points)
+      if (shtConfigValueMode == 'Power Level') {
+        shtPlyrArmyListEn.hideColumns( 6, 3);
+        shtPlyrArmyListEn.hideColumns(11, 2);
+      }
+      if (shtConfigValueMode == 'Points') {
+        shtPlyrArmyListEn.hideColumns( 5, 1);
+        shtPlyrArmyListEn.hideColumns( 9, 2);
+      }
       
       // French Version
       ssArmyListFr.insertSheet(shtPlyrName, 0, {template: shtArmyListFr});
       shtPlyrArmyListFr = ssArmyListFr.getSheets()[0];
       
       // Opens the new sheet and modify appropriate data (Player Name, Header)
-      shtPlyrArmyListFr.getRange(2,1).setValue(shtPlyrName);    
+      shtPlyrArmyListFr.getRange(1, 1, shtArmyDBMaxRows, shtArmyDBMaxCols).setValues(shtArmyDBVal);  
+      
+      // Hides the unused columns according to the Army Value (Power Level or Points)
+      if (shtConfigValueMode == 'Power Level') {
+        shtPlyrArmyListFr.hideColumns( 6, 3);
+        shtPlyrArmyListFr.hideColumns(11, 2);
+      }
+      if (shtConfigValueMode == 'Points') {
+        shtPlyrArmyListFr.hideColumns( 5, 1);
+        shtPlyrArmyListFr.hideColumns( 9, 2);
+      }
     }
   }
   // English Version
   shtPlyrArmyListEn = ssArmyListEn.getSheets()[0];
   ssArmyListEn.setActiveSheet(shtPlyrArmyListEn);
+  ssArmyListEn.getSheetByName('Template').hideSheet();
   
   // French Version
   shtPlyrArmyListFr = ssArmyListFr.getSheets()[0];
   ssArmyListFr.setActiveSheet(shtPlyrArmyListFr);
+  ssArmyListFr.getSheetByName('Template').hideSheet();
+
 }
 
 
@@ -423,7 +477,7 @@ function fcnDelPlayerArmyDB(){
 //
 // **********************************************
 
-function fcnDelPlayerArmyListSht(){
+function fcnDelPlayerArmyList(){
 
   // Main Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -444,7 +498,11 @@ function fcnDelPlayerArmyListSht(){
   var shtCurrEn;
   var shtCurrNameEn;
   var shtCurrFr;
-  var shtCurrNameFr;
+  var shtCurrNameFr;  
+  
+  // Show Template sheet
+  shtTemplateEn.showSheet();
+  shtTemplateFr.showSheet();
   
   // Activates Template Sheet
   ssArmyListEn.setActiveSheet(shtTemplateEn);
