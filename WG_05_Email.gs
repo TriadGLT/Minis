@@ -27,9 +27,9 @@ function subGetEmailAddress(ss, Addresses, WinPlyr, LosPlyr){
   }
   
   // Get Email addresses using the players rows
-  Addresses[1][0] = shtPlayers.getRange(rowWinr,colEmail-1).getValue();
+  Addresses[1][0] = shtPlayers.getRange(rowWinr,colEmail+1).getValue();
   Addresses[1][1] = shtPlayers.getRange(rowWinr,colEmail).getValue();
-  Addresses[2][0] = shtPlayers.getRange(rowLosr,colEmail-1).getValue();
+  Addresses[2][0] = shtPlayers.getRange(rowLosr,colEmail+1).getValue();
   Addresses[2][1] = shtPlayers.getRange(rowLosr,colEmail).getValue();
     
   return Addresses;
@@ -60,12 +60,12 @@ function fcnSendConfirmEmailEN(shtConfig, Address, MatchData) {
   var ssEmailID = shtConfig.getRange(25,2).getValue();
   var ssEmail = SpreadsheetApp.openById(ssEmailID);
   var shtEmailTemplates = ssEmail.getSheetByName('Templates');
-  var Headers = shtEmailTemplates.getRange(3,2,29,1).getValues();
+  var Headers = shtEmailTemplates.getRange(3,6,29,1).getValues();
   
   // League Name
   var Location = shtConfig.getRange(11,2).getValue();
   var LeagueTypeEN = shtConfig.getRange(13,2).getValue();
-  var LeagueNameEN = shtConfig.getRange(3,2).getValue() + ' ' + LeagueTypeEN;
+  var LeagueNameEN = Location + ' ' + LeagueTypeEN;
   
   // Match Data Assignation
   var MatchID = MatchData[2][0];
@@ -74,7 +74,7 @@ function fcnSendConfirmEmailEN(shtConfig, Address, MatchData) {
   var Losr    = MatchData[5][0];
   
   // Set Email Subject
-  EmailSubject = Location + ' ' + LeagueNameEN + " - Week " + Week + " - Match Result" ;
+  EmailSubject = LeagueNameEN + " - Week " + Week + " - Match Result" ;
     
   // Start of Email Message
   EmailMessage = '<html><body>';
@@ -83,7 +83,7 @@ function fcnSendConfirmEmailEN(shtConfig, Address, MatchData) {
     '<br><br>Here is your match result:<br><br>';
     
   // Generate Match Data Table
-  EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,1);
+  EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,'EN');
   
   EmailMessage += "<br>Click below to access the League Standings and Results:"+
     "<br>"+ StandingsUrl +
@@ -98,8 +98,8 @@ function fcnSendConfirmEmailEN(shtConfig, Address, MatchData) {
   EmailMessage += '</body></html>';
   
   // Sends email to both players with the Match Data
-  if (Address[1][0] == 'English' && Address[1][1] != '') MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
-  if (Address[2][0] == 'English' && Address[2][1] != '') MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+  if (Address[1][0] == 'English' && Address[1][1] != '') MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
+  if (Address[2][0] == 'English' && Address[2][1] != '') MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
 }
 
 
@@ -129,12 +129,12 @@ function fcnSendErrorEmailEN(shtConfig, Address, MatchData, MatchID, Status) {
   var ssEmailID = shtConfig.getRange(25,2).getValue();
   var ssEmail = SpreadsheetApp.openById(ssEmailID);
   var shtEmailTemplates = ssEmail.getSheetByName('Templates');
-  var Headers = shtEmailTemplates.getRange(3,2,29,1).getValues();
+  var Headers = shtEmailTemplates.getRange(3,6,29,1).getValues();
   
   // League Name
   var Location = shtConfig.getRange(11,2).getValue();
   var LeagueTypeEN = shtConfig.getRange(13,2).getValue();
-  var LeagueNameEN = shtConfig.getRange(3,2).getValue() + ' ' + LeagueTypeEN;
+  var LeagueNameEN = Location + ' ' + LeagueTypeEN;
   
   // Match Data Assignation
   var MatchID = MatchData[2][0];
@@ -164,7 +164,7 @@ function fcnSendErrorEmailEN(shtConfig, Address, MatchData, MatchID, Status) {
   }
   
   // Set Email Subject
-  EmailSubject = Location + ' ' + LeagueNameEN + ' - Week ' + Week + ' - Match Report Error' ;
+  EmailSubject = LeagueNameEN + ' - Week ' + Week + ' - Match Report Error' ;
   
   // Start of Email Message
   EmailMessage = '<html><body>';
@@ -177,7 +177,7 @@ function fcnSendErrorEmailEN(shtConfig, Address, MatchData, MatchID, Status) {
           '<br><br>Here is your match result:<br><br>';
     
     // Populate the Match Data Table
-    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,StatusMsg);
+    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,'EN');
   }
 
   // If Error did not prevent Match Data to be processed (Card Name not Found for Card Number X)    
@@ -188,7 +188,7 @@ function fcnSendErrorEmailEN(shtConfig, Address, MatchData, MatchID, Status) {
           '<br><br>Here is your match result:<br><br>';
     
     // Populate the Match Data Table
-    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,StatusMsg);
+    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,'EN');
   }
 
   // If Process Error was Detected 
@@ -212,16 +212,16 @@ function fcnSendErrorEmailEN(shtConfig, Address, MatchData, MatchID, Status) {
   EmailMessage += '</body></html>';
    
   // Send email to Administrator
-  MailApp.sendEmail(Address[0][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+  MailApp.sendEmail(Address[0][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
   
   // If Error is between 0 and -60, send email to players. If not, only send to Administrator
   if (Status[0] >= -60){
     // Sends email to both players with the Match Data
     if (Address[1][0] == 'English' && Address[1][1] != '') {
-      MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+      MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
     }
     if (Address[2][0] == 'English' && Address[2][1] != ''&& Address[1][1] != Address[2][1]) {
-      MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+      MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
     }
   }
 }
@@ -251,12 +251,12 @@ function fcnSendConfirmEmailFR(shtConfig, Address, MatchData) {
   var ssEmailID = shtConfig.getRange(25,2).getValue();
   var ssEmail = SpreadsheetApp.openById(ssEmailID);
   var shtEmailTemplates = ssEmail.getSheetByName('Templates');
-  var Headers = shtEmailTemplates.getRange(3,3,29,1).getValues();
+  var Headers = shtEmailTemplates.getRange(3,7,29,1).getValues();
   
   // League Name
   var Location = shtConfig.getRange(11,2).getValue();
   var LeagueTypeFR = shtConfig.getRange(14,2).getValue();
-  var LeagueNameFR = LeagueTypeFR + ' ' + shtConfig.getRange(3,2).getValue();
+  var LeagueNameFR = LeagueTypeFR + ' ' + Location;
 
   // Match Data Assignation
   var MatchID = MatchData[2][0];
@@ -265,7 +265,7 @@ function fcnSendConfirmEmailFR(shtConfig, Address, MatchData) {
   var Losr    = MatchData[5][0];
 
   // Set Email Subject
-  EmailSubject = Location + ' ' + LeagueNameFR + " - Week " + Week + " - Rapport de Match" ;
+  EmailSubject = LeagueNameFR + " - Week " + Week + " - Rapport de Match" ;
     
   // Start of Email Message
   EmailMessage = "<html><body>";
@@ -274,7 +274,7 @@ function fcnSendConfirmEmailFR(shtConfig, Address, MatchData) {
     "<br><br>Voici le sommaire de votre match:<br><br>";
     
   // Generate Match Data Table
-  EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,1);
+  EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,'FR');
   
   EmailMessage += "<br>Cliquez ci-dessous pour accéder au classement et statistiques de la ligue:"+
     "<br>"+ StandingsUrl +
@@ -289,8 +289,8 @@ function fcnSendConfirmEmailFR(shtConfig, Address, MatchData) {
   EmailMessage += "</body></html>";
   
   // Sends email to both players with the Match Data
-  if (Address[1][0] == 'Français' && Address[1][1] != '') MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
-  if (Address[2][0] == 'Français' && Address[2][1] != '') MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+  if (Address[1][0] == 'Français' && Address[1][1] != '') MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
+  if (Address[2][0] == 'Français' && Address[2][1] != '') MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
 }
 
 
@@ -320,12 +320,12 @@ function fcnSendErrorEmailFR(shtConfig, Address, MatchData, MatchID, Status) {
   var ssEmailID = shtConfig.getRange(25,2).getValue();
   var ssEmail = SpreadsheetApp.openById(ssEmailID);
   var shtEmailTemplates = ssEmail.getSheetByName('Templates');
-  var Headers = shtEmailTemplates.getRange(3,3,29,1).getValues();
+  var Headers = shtEmailTemplates.getRange(3,7,29,1).getValues();
     
   // League Name
   var Location = shtConfig.getRange(11,2).getValue();
   var LeagueTypeFR = shtConfig.getRange(14,2).getValue();
-  var LeagueNameFR = LeagueTypeFR + ' ' + shtConfig.getRange(3,2).getValue();
+  var LeagueNameFR = LeagueTypeFR + ' ' + Location;
 
   // Match Data Assignation
   var MatchID = MatchData[2][0];
@@ -355,7 +355,7 @@ function fcnSendErrorEmailFR(shtConfig, Address, MatchData, MatchID, Status) {
   }
   
   // Set Email Subject
-  EmailSubject = Location + ' ' + LeagueNameFR + ' - Week ' + Week + ' - Erreur Rapport de Match' ;
+  EmailSubject = LeagueNameFR + ' - Week ' + Week + ' - Erreur Rapport de Match' ;
   
   // Start of Email Message
   EmailMessage = "<html><body>";
@@ -368,7 +368,7 @@ function fcnSendErrorEmailFR(shtConfig, Address, MatchData, MatchID, Status) {
           "<br><br>Voici le sommaire de votre match:<br><br>";
     
     // Populate the Match Data Table
-    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,StatusMsg);
+    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,'FR');
   }
 
   // If Error did not prevent Match Data to be processed (Card Name not Found for Card Number X)    
@@ -379,7 +379,7 @@ function fcnSendErrorEmailFR(shtConfig, Address, MatchData, MatchID, Status) {
           "<br><br>Voici le sommaire de votre match:<br><br>";
     
     // Populate the Match Data Table
-    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,StatusMsg);
+    EmailMessage = subMatchReportTable(EmailMessage, Headers, MatchData,'FR');
   }
 
   // If Process Error was Detected 
@@ -403,19 +403,79 @@ function fcnSendErrorEmailFR(shtConfig, Address, MatchData, MatchID, Status) {
   EmailMessage += "</body></html>";
    
   // Send email to Administrator
-  // MailApp.sendEmail(Address[0][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+  // MailApp.sendEmail(Address[0][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
   
   // If Error is between 0 and -60, send email to players. If not, only send to Administrator
   if (Status[0] >= -60){
     // Sends email to both players with the Match Data
     if (Address[1][0] == 'Français' && Address[1][1] != '') {
-      MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+      MailApp.sendEmail(Address[1][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
     }
     if (Address[2][0] == 'Français' && Address[2][1] != ''&& Address[1][1] != Address[2][1]) {
-      MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+      MailApp.sendEmail(Address[2][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
     }
   }
 }
+
+
+// **********************************************
+// function subMatchReportTable()
+//
+// This function generates the HTML table that displays 
+// the Match Data and Booster Pack Data
+//
+// **********************************************
+
+function subMatchReportTable(EmailMessage, Headers, MatchData, Param){
+  
+  for(var row=0; row<=6; ++row){
+
+    //if(row == 1) ++row;
+    
+    // Start of Match Table
+    if(row == 0) EmailMessage += '<table style="border-collapse:collapse;" border = 1 cellpadding = 5><tr>';
+    
+    // Match Data
+    if(row <= 6) {
+      
+      // Translate MatchData if necessary
+      if (Param == 'EN' && MatchData[row][0] == 'Oui') MatchData[row][0] = 'Yes';
+      if (Param == 'EN' && MatchData[row][0] == 'Non') MatchData[row][0] = 'No' ;
+      if (Param == 'FR' && MatchData[row][0] == 'Yes') MatchData[row][0] = 'Oui';
+      if (Param == 'FR' && MatchData[row][0] == 'No' ) MatchData[row][0] = 'Non';
+            
+      // If Match is NOT a Tie, Do not change anything
+      if(MatchData[6][0] == 'No' || MatchData[6][0] == 'Non') {
+        if(row < 6) EmailMessage += '<tr><td>'+Headers[row][0]+'</td><td>'+MatchData[row][0]+'</td></tr>';
+      }
+      
+      // If Match is a Tie, Change some Header Values
+      if (MatchData[6][0] == 'Yes' || MatchData[6][0] == 'Oui') {
+                
+        if(row < 4) EmailMessage += '<tr><td>'+Headers[row][0]+'</td><td>'+MatchData[row][0]+'</td></tr>';
+        
+        // If Match is Tie, replace Winning Player by Player 1
+        if(row == 4 && Param == 'EN') EmailMessage += '<tr><td>Player 1</td><td>'+MatchData[row][0]+'</td></tr>';
+        
+        // If Match is Tie, replace Losing Player by Player 2
+        if(row == 5 && Param == 'EN') EmailMessage += '<tr><td>Player 2</td><td>'+MatchData[row][0]+'</td></tr>';
+        
+        // If Match is Tie, replace Joueur Gagnant by Joueur 1
+        if(row == 4 && Param == 'FR') EmailMessage += '<tr><td>Joueur 1</td><td>'+MatchData[row][0]+'</td></tr>';
+        
+        // If Match is Tie, replace Joueur Perdant by Joueur 2
+        if(row == 5 && Param == 'FR') EmailMessage += '<tr><td>Joueur 2</td><td>'+MatchData[row][0]+'</td></tr>';
+        
+        if(row == 6) EmailMessage += '<tr><td>'+Headers[row][0]+'</td><td>'+MatchData[row][0]+'</td></tr>';
+      }
+    }
+    
+    // End of Table
+    if(row == 6) EmailMessage += '</table><br>';   
+  }
+  return EmailMessage +'</table>';
+}
+
 
 // **********************************************
 // function fcnSendFeedbackEmail()
@@ -460,43 +520,12 @@ function fcnSendFeedbackEmail(shtConfig, Address, MatchData, Feedback) {
   EmailMessage += '</body></html>';
   
   // Send email to Administrator
-  MailApp.sendEmail(Address[0][1], EmailSubject, EmailMessage,{name:'Triad Gaming League Manager',htmlBody:EmailMessage});
+  MailApp.sendEmail(Address[0][1], EmailSubject, EmailMessage,{name:'Turn 1 Gaming League Manager',htmlBody:EmailMessage});
 }
 
 
-
 // **********************************************
-// function subMatchReportTable()
-//
-// This function generates the HTML table that displays 
-// the Match Data and Booster Pack Data
-//
-// **********************************************
-
-function subMatchReportTable(EmailMessage, Headers, MatchData, Param){
-  
-  for(var row=0; row<24; ++row){
-
-    if(row == 1) ++row;
-    
-    // Start of Match Table
-    if(row == 0) {
-      EmailMessage += '<table style="border-collapse:collapse;" border = 1 cellpadding = 5><tr>';
-    }
-    
-    // Match Data
-    if(row < 7) {
-      EmailMessage += '<tr><td>'+Headers[row][0]+'</td><td>'+MatchData[row][0]+'</td></tr>';
-    }
-    
-    // End of first Table
-    if(row == 7) EmailMessage += '</table><br>';   
-  }
-  return EmailMessage +'</table>';
-}
-
-// **********************************************
-// function subMatchReportTable()
+// function subEmailPlayerPenaltyTable()
 //
 // This function generates the HTML table that displays 
 // the Match Data and Booster Pack Data

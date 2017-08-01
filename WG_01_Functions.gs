@@ -511,6 +511,8 @@ function fcnCopyStandingsResults(ss, shtConfig){
   var ssMstrShtMaxRows;
   var ssMstrShtMaxCols;
   var ssMstrShtData;
+  var ssMstrStartDate;
+  var ssMstrEndDate;
   var NumValues;
   var ColValues;
   
@@ -570,6 +572,17 @@ function fcnCopyStandingsResults(ss, shtConfig){
       }
       ssLgShtFr.getRange(ssMstrShtStartRow, 13, NumValues, 1).setValues(ColValues);
     }
+    
+    // Copy Week Dates for Week Results and Add 
+    if (sht >=2){
+      ssMstrStartDate = ssMstrSht.getRange(3,2).getValue();
+      ssMstrEndDate   = ssMstrSht.getRange(4,2).getValue();
+      ssLgShtEn.getRange(3,2).setValue('Start: ' + ssMstrStartDate);
+      ssLgShtEn.getRange(4,2).setValue('End: ' + ssMstrEndDate);
+      ssLgShtFr.getRange(3,2).setValue('Début: ' + ssMstrStartDate);
+      ssLgShtFr.getRange(4,2).setValue('Fin: ' + ssMstrEndDate);
+    }
+    
     // Hide Unused Rows
     ssLgShtEn.hideRows(ssMstrShtStartRow, ssMstrShtMaxRows - ssMstrShtStartRow + 1);
     ssLgShtEn.showRows(ssMstrShtStartRow, NbPlayers);
