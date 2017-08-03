@@ -14,6 +14,8 @@ function fcnSetUpForm() {
   var NbUnitDetach2 = shtConfig.getRange(14, 7).getValue();
   var NbUnitDetach3 = shtConfig.getRange(15, 7).getValue();
   var NbUnitMax;
+  var Detachments = shtConfig.getRange(16, 6, 13, 2).getValues();
+  var DetachTypeNb;
   var ChUnit;
   var ChDetach;
   var ChEnd;
@@ -24,19 +26,31 @@ function fcnSetUpForm() {
   var UnitRole;
   var TestCol = 1;
   
-  // Sets the P
-
+  // Clears the Log
   Logger.clear();
   
-  var FormName = "Wargaming League Subscription";
-  var form = FormApp.create(FormName).setTitle("Wargaming League Subscription");
-  //var form = FormApp.openById("1VF-2McIUPJPk2zqM7ruSRmNsjOmvDnaMbCTJKjVjcVQ");
+  // Gets the Subscription ID from the Config File
+  var FormSubscrID = shtConfig.getRange(36, 2).getValue();
+  
+  // If Subscription Form does not exist, create it
+  if(FormSubscrID == ''){
+    var FormName = shtConfig.getRange(3, 2).getValue() + " Subscription";
+    var form = FormApp.create(FormName).setTitle(FormName);
+    // Set Subscription ID in Config File
+    var NewFormID = form.getId();
+    shtConfig.getRange(36, 2).setValue(NewFormID);
+  }
+  
+  if(FormSubscrID != ''){
+    var form = FormApp.openById(FormSubscrID);
+    var formItems = form.getItems();
+    Logger.log(formItems.length)
+    for(var items = 0; items < formItems.length; items++){
+      form.deleteItem(formItems[items]);
+    }
+  }
 
-//  var formItems = form.getItems();
-//  //Logger.log(formItems.length)
-//  for(var items = 0; items < formItems.length; items++){
-//    form.deleteItem(formItems[items]);
-//  }
+
   
   form.setDescription("Please fill up the following to submit your Army List");
   form.setCollectEmail(true);
@@ -68,9 +82,6 @@ function fcnSetUpForm() {
       .setTitle("Army Name")
       .setRequired(false); 
 
-  Logger.log('Detachment:%s',NbDetachMax)
-  Logger.log('Units:%s',NbUnitMax)
-  
   // Creates the Detachment 1 Section
   var Detach1 = form.addPageBreakItem().setTitle("Detachment 1");
   // Detachment Name
@@ -79,21 +90,21 @@ function fcnSetUpForm() {
       .setRequired(true);
   // Detachment Type
   DetachType = form.addListItem();
-  DetachType.setTitle("Detachment 1 Type")
-  DetachType.setRequired(true)
-  DetachType.setChoices([DetachType.createChoice("Patrol"),
-                         DetachType.createChoice("Battalion"),
-                         DetachType.createChoice("Brigade"),
-                         DetachType.createChoice("Vanguard"),
-                         DetachType.createChoice("Spearhead"),
-                         DetachType.createChoice("Outrider"),
-                         DetachType.createChoice("Supreme Command"),
-                         DetachType.createChoice("Super-Heavy"),
-                         DetachType.createChoice("Air Wing"),
-                         DetachType.createChoice("Super-Heavy Auxiliary"),
-                         DetachType.createChoice("Fortification Network"),
-                         DetachType.createChoice("Auxiliary Support")]);
-  
+  DetachType.setTitle("Detachment 1 Type");
+  DetachType.setRequired(true);
+  DetachType.setChoices([DetachType.createChoice(Detachments[1][0]),
+                         DetachType.createChoice(Detachments[2][0]),
+                         DetachType.createChoice(Detachments[3][0]),
+                         DetachType.createChoice(Detachments[4][0]),
+                         DetachType.createChoice(Detachments[5][0]),
+                         DetachType.createChoice(Detachments[6][0]),
+                         DetachType.createChoice(Detachments[7][0]),
+                         DetachType.createChoice(Detachments[8][0]),
+                         DetachType.createChoice(Detachments[9][0]),
+                         DetachType.createChoice(Detachments[10][0]),
+                         DetachType.createChoice(Detachments[11][0]),
+                         DetachType.createChoice(Detachments[12][0])]);
+ 
   // Creates the Detachment 2 Section
   if(NbDetachMax >= 2){
     var Detach2 = form.addPageBreakItem().setTitle("Detachment 2");
@@ -105,18 +116,18 @@ function fcnSetUpForm() {
     DetachType = form.addListItem();
     DetachType.setTitle("Detachment 2 Type")
     DetachType.setRequired(true)
-    DetachType.setChoices([DetachType.createChoice("Patrol"),
-                           DetachType.createChoice("Battalion"),
-                           DetachType.createChoice("Brigade"),
-                           DetachType.createChoice("Vanguard"),
-                           DetachType.createChoice("Spearhead"),
-                           DetachType.createChoice("Outrider"),
-                           DetachType.createChoice("Supreme Command"),
-                           DetachType.createChoice("Super-Heavy"),
-                           DetachType.createChoice("Air Wing"),
-                           DetachType.createChoice("Super-Heavy Auxiliary"),
-                           DetachType.createChoice("Fortification Network"),
-                           DetachType.createChoice("Auxiliary Support")]);  
+    DetachType.setChoices([DetachType.createChoice(Detachments[1][0]),
+                           DetachType.createChoice(Detachments[2][0]),
+                           DetachType.createChoice(Detachments[3][0]),
+                           DetachType.createChoice(Detachments[4][0]),
+                           DetachType.createChoice(Detachments[5][0]),
+                           DetachType.createChoice(Detachments[6][0]),
+                           DetachType.createChoice(Detachments[7][0]),
+                           DetachType.createChoice(Detachments[8][0]),
+                           DetachType.createChoice(Detachments[9][0]),
+                           DetachType.createChoice(Detachments[10][0]),
+                           DetachType.createChoice(Detachments[11][0]),
+                           DetachType.createChoice(Detachments[12][0])]); 
   }
   
   // Creates the Detachment 3 Section
@@ -130,27 +141,31 @@ function fcnSetUpForm() {
     DetachType = form.addListItem();
     DetachType.setTitle("Detachment 3 Type")
     DetachType.setRequired(true)
-    DetachType.setChoices([DetachType.createChoice("Patrol"),
-                           DetachType.createChoice("Battalion"),
-                           DetachType.createChoice("Brigade"),
-                           DetachType.createChoice("Vanguard"),
-                           DetachType.createChoice("Spearhead"),
-                           DetachType.createChoice("Outrider"),
-                           DetachType.createChoice("Supreme Command"),
-                           DetachType.createChoice("Super-Heavy"),
-                           DetachType.createChoice("Air Wing"),
-                           DetachType.createChoice("Super-Heavy Auxiliary"),
-                           DetachType.createChoice("Fortification Network"),
-                           DetachType.createChoice("Auxiliary Support")]);
+    DetachType.setChoices([DetachType.createChoice(Detachments[1][0]),
+                           DetachType.createChoice(Detachments[2][0]),
+                           DetachType.createChoice(Detachments[3][0]),
+                           DetachType.createChoice(Detachments[4][0]),
+                           DetachType.createChoice(Detachments[5][0]),
+                           DetachType.createChoice(Detachments[6][0]),
+                           DetachType.createChoice(Detachments[7][0]),
+                           DetachType.createChoice(Detachments[8][0]),
+                           DetachType.createChoice(Detachments[9][0]),
+                           DetachType.createChoice(Detachments[10][0]),
+                           DetachType.createChoice(Detachments[11][0]),
+                           DetachType.createChoice(Detachments[12][0])]);
   }
   
-  // Loop through each potential unit of each detachment
+  Logger.log('Detachments:%s',NbDetachMax)
   
+  // Loop through each potential unit of each detachment
   for(var DetachNb = 1; DetachNb <= NbDetachMax; DetachNb++){
     // Selects the number of Units allowed in each Detachment
     if(DetachNb == 1) NbUnitMax = NbUnitDetach1;
     if(DetachNb == 2) NbUnitMax = NbUnitDetach2;
     if(DetachNb == 3) NbUnitMax = NbUnitDetach3;
+    
+    Logger.log('Current Detachment:%s',DetachNb);
+    Logger.log('Units:%s',NbUnitMax);
     
     for(var UnitNb = 1; UnitNb <= NbUnitMax; UnitNb++){
       

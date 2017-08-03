@@ -30,6 +30,7 @@ function fcnInitLeague(){
   var MaxRowRspnFR = shtResponsesFR.getMaxRows();
   var MaxColRspnFR = shtResponsesFR.getMaxColumns();
   
+  var cfgWeekRound = shtConfig.getRange(13,9).getValue();  
   var ColMatchID = shtConfig.getRange(17,9).getValue();
   var ColMatchIDLastVal = shtConfig.getRange(22,9).getValue();
   
@@ -44,7 +45,9 @@ function fcnInitLeague(){
   
   // Week Results
   for (var WeekNum = 1; WeekNum <= 8; WeekNum++){
-    shtWeek = ss.getSheetByName('Week'+WeekNum);
+    // Select Week or Round prefix (League or Tournament)
+    if(cfgWeekRound == 'Week') shtWeek = ss.getSheetByName('Week'+WeekNum);
+    if(cfgWeekRound == 'Round') shtWeek = ss.getSheetByName('Round'+WeekNum);
     shtWeek.getRange(5,5,32,3).clearContent();
     shtWeek.getRange(5,9,32,3).clearContent();
   }
@@ -69,8 +72,8 @@ function fcnInitLeague(){
 // **********************************************
 // function fcnResetLeagueMatch()
 //
-// This function clears all data from sheets  
-// to start a new league
+// This function clears all Results data but
+// does not clear Responses
 //
 // **********************************************
 
@@ -96,7 +99,8 @@ function fcnResetLeagueMatch(){
   var MaxColRspnEN = shtResponsesEN.getMaxColumns();
   var MaxRowRspnFR = shtResponsesFR.getMaxRows();
   var MaxColRspnFR = shtResponsesFR.getMaxColumns();
-  
+
+  var cfgWeekRound = shtConfig.getRange(13,9).getValue();  
   var ColMatchID = shtConfig.getRange(17,9).getValue();
   var ColMatchIDLastVal = shtConfig.getRange(22,9).getValue();
   
@@ -106,11 +110,13 @@ function fcnResetLeagueMatch(){
   shtResponses.getRange(2,1,MaxRowRspn-1,MaxColRspn).clearContent();
   shtResponses.getRange(1,ColMatchIDLastVal).setValue(0);
   shtResponsesEN.getRange(2,ColMatchID,MaxRowRspnEN-1,7).clearContent();
-  shtResponsesFR.getRange(2,ColMatchID,MaxRowRspnFR-1,7).clearContent()
+  shtResponsesFR.getRange(2,ColMatchID,MaxRowRspnFR-1,7).clearContent();
   
   // Week Results
   for (var WeekNum = 1; WeekNum <= 8; WeekNum++){
-    shtWeek = ss.getSheetByName('Week'+WeekNum);
+    // Select Week or Round prefix (League or Tournament)
+    if(cfgWeekRound == 'Week') shtWeek = ss.getSheetByName('Week'+WeekNum);
+    if(cfgWeekRound == 'Round') shtWeek = ss.getSheetByName('Round'+WeekNum);
     shtWeek.getRange(5,5,32,3).clearContent();
     shtWeek.getRange(5,9,32,3).clearContent();
   }
@@ -173,7 +179,7 @@ function fcnUpdateLinksIDs(){
         case 'Master WG League' :
           ConfigRowID = StartRowConfigId + 0;
           ConfigRowLk = 'Not Found'; break;
-        case 'Master WG League Army Lists DB' :
+        case 'Master WG League Army DB' :
           ConfigRowID = StartRowConfigId + 1; 
           ConfigRowLk = 'Not Found'; break;
         case 'Master WG League Army Lists EN' :
