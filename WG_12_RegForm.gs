@@ -1,13 +1,26 @@
-/**
- * Creates a Google Form that allows respondents to enter their game 
- *
- * @param {Spreadsheet} ss The spreadsheet that contains the conference data.
- * @param {String[][]} values Cell values for the spreadsheet range.
- */
+// **********************************************
+// function fcnSetUpForm()
+//
+// This function creates the Registration Form 
+// based on the parameters in the Config File
+//
+// **********************************************
+
 function fcnSetUpForm() {
   
   var ss = SpreadsheetApp.getActive();
+  var ssID;
   var shtConfig = ss.getSheetByName('Config');
+  var ssSheets;
+  var NbSheets;
+  var SheetName;
+  var shtRegResp;
+  
+  var form;
+  var FormName;
+  var FormID;
+  var FormItems;
+  var FormSubscrID;
   
   var NbDetachMax = shtConfig.getRange(12, 7).getValue();
   var NbUnitDetach1 = shtConfig.getRange(13, 7).getValue();
@@ -16,10 +29,12 @@ function fcnSetUpForm() {
   var NbUnitMax;
   var Detachments = shtConfig.getRange(16, 6, 13, 2).getValues();
   var DetachTypeNb;
+  var DetachType;
+  var DetachIncr;
+  var DetachTypeArray = [];
   var ChUnit;
   var ChDetach;
   var ChEnd;
-  var DetachType;
   var UnitPage = new Array(325);
   var Title;
   var Index;
@@ -30,32 +45,27 @@ function fcnSetUpForm() {
   Logger.clear();
   
   // Gets the Subscription ID from the Config File
-  var FormSubscrID = shtConfig.getRange(36, 2).getValue();
+  FormSubscrID = shtConfig.getRange(38, 2).getValue();
+  ssID = shtConfig.getRange(30, 2).getValue();
   
+  // If Form Exists, Unlink from Response Sheet and Delete
+  if(FormSubscrID != ''){
+    Drive.Files.remove(FormSubscrID);
+    FormSubscrID = '';
+  }
+
   // If Subscription Form does not exist, create it
   if(FormSubscrID == ''){
-    var FormName = shtConfig.getRange(3, 2).getValue() + " Subscription";
-    var form = FormApp.create(FormName).setTitle(FormName);
+    FormName = shtConfig.getRange(3, 2).getValue() + " Registration";
+    form = FormApp.create(FormName).setTitle(FormName);
     // Set Subscription ID in Config File
-    var NewFormID = form.getId();
-    shtConfig.getRange(36, 2).setValue(NewFormID);
-  }
-  
-  if(FormSubscrID != ''){
-    var form = FormApp.openById(FormSubscrID);
-    var formItems = form.getItems();
-    Logger.log(formItems.length)
-    for(var items = 0; items < formItems.length; items++){
-      form.deleteItem(formItems[items]);
-    }
+    FormID = form.getId();
+    shtConfig.getRange(38, 2).setValue(FormID);
   }
 
-
-  
+  // Set Regsitration Form Description
   form.setDescription("Please fill up the following to submit your Army List");
   form.setCollectEmail(true);
-  // Sets Results Destination - NOT USED
-  //form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
   
   // Player name
   form.addTextItem()
@@ -92,18 +102,17 @@ function fcnSetUpForm() {
   DetachType = form.addListItem();
   DetachType.setTitle("Detachment 1 Type");
   DetachType.setRequired(true);
-  DetachType.setChoices([DetachType.createChoice(Detachments[1][0]),
-                         DetachType.createChoice(Detachments[2][0]),
-                         DetachType.createChoice(Detachments[3][0]),
-                         DetachType.createChoice(Detachments[4][0]),
-                         DetachType.createChoice(Detachments[5][0]),
-                         DetachType.createChoice(Detachments[6][0]),
-                         DetachType.createChoice(Detachments[7][0]),
-                         DetachType.createChoice(Detachments[8][0]),
-                         DetachType.createChoice(Detachments[9][0]),
-                         DetachType.createChoice(Detachments[10][0]),
-                         DetachType.createChoice(Detachments[11][0]),
-                         DetachType.createChoice(Detachments[12][0])]);
+  
+  // Creates the List of Detachments Allowed for League
+  DetachIncr = 0;
+  for(var detach = 1; detach <= 12; detach++) {
+    if(Detachments[detach][1] == 'Yes') {
+      DetachTypeArray[DetachIncr] = Detachments[detach][0];
+      DetachIncr++;
+    }
+  }  
+  DetachType.setChoiceValues(DetachTypeArray);
+
  
   // Creates the Detachment 2 Section
   if(NbDetachMax >= 2){
@@ -116,18 +125,16 @@ function fcnSetUpForm() {
     DetachType = form.addListItem();
     DetachType.setTitle("Detachment 2 Type")
     DetachType.setRequired(true)
-    DetachType.setChoices([DetachType.createChoice(Detachments[1][0]),
-                           DetachType.createChoice(Detachments[2][0]),
-                           DetachType.createChoice(Detachments[3][0]),
-                           DetachType.createChoice(Detachments[4][0]),
-                           DetachType.createChoice(Detachments[5][0]),
-                           DetachType.createChoice(Detachments[6][0]),
-                           DetachType.createChoice(Detachments[7][0]),
-                           DetachType.createChoice(Detachments[8][0]),
-                           DetachType.createChoice(Detachments[9][0]),
-                           DetachType.createChoice(Detachments[10][0]),
-                           DetachType.createChoice(Detachments[11][0]),
-                           DetachType.createChoice(Detachments[12][0])]); 
+  
+    // Creates the List of Detachments Allowed for League
+    DetachIncr = 0;
+    for(var detach = 1; detach <= 12; detach++) {
+      if(Detachments[detach][1] == 'Yes') {
+        DetachTypeArray[DetachIncr] = Detachments[detach][0];
+        DetachIncr++;
+      }
+    }  
+    DetachType.setChoiceValues(DetachTypeArray);
   }
   
   // Creates the Detachment 3 Section
@@ -141,21 +148,19 @@ function fcnSetUpForm() {
     DetachType = form.addListItem();
     DetachType.setTitle("Detachment 3 Type")
     DetachType.setRequired(true)
-    DetachType.setChoices([DetachType.createChoice(Detachments[1][0]),
-                           DetachType.createChoice(Detachments[2][0]),
-                           DetachType.createChoice(Detachments[3][0]),
-                           DetachType.createChoice(Detachments[4][0]),
-                           DetachType.createChoice(Detachments[5][0]),
-                           DetachType.createChoice(Detachments[6][0]),
-                           DetachType.createChoice(Detachments[7][0]),
-                           DetachType.createChoice(Detachments[8][0]),
-                           DetachType.createChoice(Detachments[9][0]),
-                           DetachType.createChoice(Detachments[10][0]),
-                           DetachType.createChoice(Detachments[11][0]),
-                           DetachType.createChoice(Detachments[12][0])]);
+  
+    // Creates the List of Detachments Allowed for League
+    DetachIncr = 0;
+    for(var detach = 1; detach <= 12; detach++) {
+      if(Detachments[detach][1] == 'Yes') {
+        DetachTypeArray[DetachIncr] = Detachments[detach][0];
+        DetachIncr++;
+      }
+    }  
+    DetachType.setChoiceValues(DetachTypeArray);
   }
   
-  Logger.log('Detachments:%s',NbDetachMax)
+  Logger.log('Nb Detachments:%s',NbDetachMax)
   
   // Loop through each potential unit of each detachment
   for(var DetachNb = 1; DetachNb <= NbDetachMax; DetachNb++){
@@ -165,7 +170,7 @@ function fcnSetUpForm() {
     if(DetachNb == 3) NbUnitMax = NbUnitDetach3;
     
     Logger.log('Current Detachment:%s',DetachNb);
-    Logger.log('Units:%s',NbUnitMax);
+    Logger.log('Nb Units:%s',NbUnitMax);
     
     for(var UnitNb = 1; UnitNb <= NbUnitMax; UnitNb++){
       
@@ -173,7 +178,7 @@ function fcnSetUpForm() {
       Index = (DetachNb*100) + UnitNb;
       Title = "Detachment " + DetachNb + " - Unit " + UnitNb;
       UnitPage[Index] = form.addPageBreakItem().setTitle(Title);
-      Logger.log(Index);
+      //Logger.log(Index);
       // Unit Title
       form.addTextItem()
           .setTitle("Detachment " + DetachNb + " - Unit " + UnitNb + " - Unit Title")
@@ -240,18 +245,34 @@ function fcnSetUpForm() {
       }
     
       if (DetachNb == NbDetachMax && UnitNb == NbUnitMax) UnitNb = NbUnitMax + 1; 
-    
     }
   }
-  // Sets Go To Unit Page
+  
+  // Sets Go To Detachment 2 Unit 1 Page
   if(NbDetachMax == 2){
     Detach2.setGoToPage(UnitPage[101]);
     UnitPage[101].setGoToPage(UnitPage[201]);
   }
-   
+  
+  // Sets Go To Detachment 3 Unit 1 Page   
   if(NbDetachMax == 3){
     Detach2.setGoToPage(UnitPage[101]);
     Detach3.setGoToPage(UnitPage[201]);
     UnitPage[101].setGoToPage(UnitPage[301]);
   }
+  
+  // Set Response Destination
+  form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
+  
+  // Find and Rename Response Sheet
+  ss = SpreadsheetApp.openById(ssID);
+  ssSheets = ss.getSheets();
+//  NbSheets = ss.getNumSheets();
+//  for(var sheet = 0; sheet < NbSheets; sheet++){
+//    SheetName = ssSheets[sheet].getName();
+//    Logger.log('Sheet %s, Name: %s',sheet,SheetName);
+//  }
+  ssSheets[0].setName('Registration');
+  shtRegResp = ss.getSheetByName('Registration');
+  ss.moveActiveSheet(17);
 }

@@ -1,12 +1,47 @@
 // **********************************************
-// function fcnMain()
+// function fcnSubmitWG_Master()
+//
+// This function analyzes the form submitted
+// and executes the appropriate functions
+//
+// **********************************************
+
+function fcnSubmitWG_Master(e) {
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+   
+  // Get Row from New Response
+  var rngResponse = e.range;
+  var RowResponse = e.range.getRow();
+  Logger.log('Response Row: %s',RowResponse);
+  
+  // Get Sheet from New Response
+  var shtResponse = SpreadsheetApp.getActiveSheet();
+  var ShtName = shtResponse.getSheetName();
+  Logger.log('Sheet: %s',ShtName);
+  
+  // If Form Submitted is a Match Report, process results
+  if(ShtName == 'Responses EN' || ShtName == 'Responses FR') {
+    fcnProcessMatchTCG_Master();
+  }
+  
+  // If Form Submitted is a Player Subscription
+  if(ShtName == 'Registration EN' || ShtName == 'Registration FR'){
+    fcnRegistrationWG(ss, shtResponse, RowResponse);
+  }
+
+}
+  
+  
+// **********************************************
+// function fcnProcessMatchWG_Master()
 //
 // This function populates the Game Results tab 
 // once a player submitted his Form
 //
 // **********************************************
 
-function fcnMainWG_Master() {
+function fcnProcessMatchWG_Master() {
   
   // Opens Spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -538,7 +573,8 @@ function fcnGameResultsWG(ss, shtConfig, ConfigData, shtRspn) {
       // Updating Match Process Data
       shtRspn.getRange(RspnRow, ColPrcsd).setValue(RspnDataPrcssd);
       shtRspn.getRange(RspnRow, ColNbUnprcsdEntries).setValue(0);
-      // If Process Error has been detected, update the Response Process Data
+      
+      // If Process Error is detected, update Status Columns in Response Sheet
       if(Status[0] < 0){
         shtRspn.getRange(RspnRow, ColStatus).setValue(Status[0]);
         shtRspn.getRange(RspnRow, ColStatusMsg).setValue(Status[1]);

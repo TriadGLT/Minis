@@ -10,7 +10,7 @@ function onOpenWG_Master() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
   var AnalyzeDataMenu  = [];
-  AnalyzeDataMenu.push({name: 'Analyze New Match Entry', functionName: 'fcnMainWG_Master'});
+  AnalyzeDataMenu.push({name: 'Process New Match Entry', functionName: 'fcnProcessMatchWG_Master'});
   AnalyzeDataMenu.push({name: 'Reset Match Entries', functionName:'fcnResetLeagueMatch'});
   
   var LeagueMenu = [];
